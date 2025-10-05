@@ -62,7 +62,7 @@ Start the development server:
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The application will be available at `http://localhost:8080`
 
 ### Building for Production
 
@@ -130,15 +130,6 @@ src/
 
 This project is designed to be deployed via Lovable.dev:
 
-1. Open your [Lovable Project](https://lovable.dev/projects/9c905e43-d3da-449c-9e27-318680beaebc)
-2. Click on Share → Publish
-
-### Custom Domain
-
-To connect a custom domain:
-1. Navigate to Project > Settings > Domains
-2. Click Connect Domain
-3. Follow the instructions in the [custom domain documentation](https://docs.lovable.dev/features/custom-domain#custom-domain)
 
 ## Contributing
 
