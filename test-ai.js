@@ -21,7 +21,7 @@ async function testAI() {
     
     console.log('To test the AI function:');
     console.log('1. Deploy the function: npx supabase functions deploy ai-chat');
-    console.log('2. Set the API key: npx supabase secrets set OPENAI_API_KEY=sk-proj-...');
+    console.log('2. Set the API key: npx supabase secrets set OPENAI_API_KEY=your_openai_api_key');
     console.log('3. Test the function through the dashboard');
     
   } catch (error) {

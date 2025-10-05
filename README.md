@@ -50,6 +50,16 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Environment Variables
+
+Before running the project, you need to set up your environment variables. Copy the [.env.example](.env.example) file to [.env](.env) and fill in your values:
+
+```bash
+cp .env.example .env
+```
+
+Then update the .env file with your actual credentials.
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -69,6 +79,13 @@ This project supports multiple authentication methods:
 3. Microsoft OAuth (Azure AD)
 
 For OAuth setup instructions, see [OAUTH_SETUP.md](OAUTH_SETUP.md).
+
+## AI Integration
+
+This project includes AI capabilities powered by OpenAI. For setup instructions, see:
+
+1. [AI_INTEGRATION.md](AI_INTEGRATION.md) - How to set up AI features
+2. [DEPLOY_AI.md](DEPLOY_AI.md) - How to deploy AI features
 
 ## How can I deploy this project?
 
