@@ -1,8 +1,16 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "optima-assist",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lavudyaraja/meetings-ai-application.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lavudyaraja/meetings-ai-application/issues"
+  },
+  "homepage": "https://github.com/lavudyaraja/meetings-ai-application#readme",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
