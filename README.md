@@ -48,7 +48,7 @@ Optima Assist is an AI-powered meeting management platform designed to enhance p
    npm install -g supabase
    
    # Set your OpenAI API key as a Supabase secret
-   supabase secrets set OPENAI_API_KEY=your_openai_api_key_here
+   supabase secrets set OPENAI_API_KEY=sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    
    # Deploy the AI chat function
    supabase functions deploy ai-chat

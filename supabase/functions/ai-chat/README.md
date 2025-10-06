@@ -7,7 +7,7 @@ This Supabase Edge Function provides AI chat capabilities for the Optima Assist 
 1. Ensure you have the Supabase CLI installed
 2. Set your OpenAI API key as a Supabase secret:
    ```bash
-   supabase secrets set OPENAI_API_KEY=your_openai_api_key_here
+   supabase secrets set OPENAI_API_KEY=sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
    ```
 
 ## Deployment
@@ -29,7 +29,7 @@ supabase functions serve --env-file .env
 Make sure your `.env` file contains your OpenAI API key:
 
 ```
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=sk-proj-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 ## Function Details
