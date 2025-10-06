@@ -16,6 +16,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const checkUserSession = useCallback(async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("ProtectedRoute - Current session:", session?.user);
       setUser(session?.user ?? null);
     } catch (error) {
       console.error("Error checking session:", error);
@@ -33,6 +34,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("ProtectedRoute - Auth state change:", _event, session?.user);
       setUser(session?.user ?? null);
       setLoading(false);
     });
