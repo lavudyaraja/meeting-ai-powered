@@ -1,150 +1,124 @@
-# Optima Assist - AI-Powered Meeting Management Platform
+# Optima Assist - AI Meeting Management Platform
 
-Optima Assist is an intelligent productivity assistant platform designed to streamline meeting management, task tracking, and team collaboration through AI-powered automation.
+Optima Assist is an AI-powered meeting management platform designed to enhance productivity through intelligent automation in meetings, task tracking, and team collaboration.
 
-## Project Overview
+## Features
 
-This application provides users with a comprehensive dashboard for managing meetings, tasks, and system settings, integrated with AI capabilities for automation and decision support.
+- **AI Assistant**: Chat-based interface for automating tasks and retrieving information
+- **Meeting Management**: Full lifecycle support for scheduling, conducting, and reviewing meetings
+- **Task Manager**: Create, assign, and track tasks with AI-generated suggestions
+- **Analytics Dashboard**: Visualize productivity metrics and meeting trends
+- **Video Conferencing**: Integrated real-time video calls within the app
+- **Settings Panel**: Configure user preferences, integrations, notifications, and security settings
 
-### Key Features
+## Prerequisites
 
-- **AI Assistant**: Integrated chat engine for intelligent task automation
-- **Meeting Management**: Schedule, view, and manage meetings with intuitive UI
-- **Task Manager**: Create, edit, and track tasks within the dashboard
-- **Analytics Dashboard**: Real-time insights into meeting patterns and productivity
-- **Video Conferencing**: Integrated video call functionality
-- **Settings Panel**: Comprehensive configuration options
-
-## Technology Stack
-
-- **Frontend**: React 18, TypeScript, Vite
-- **UI Framework**: shadcn-ui, Tailwind CSS
-- **State Management**: React Query, React Hook Form
-- **Authentication**: Supabase Auth
-- **Backend**: Supabase (PostgreSQL + Edge Functions)
-- **AI Integration**: OpenAI API via Supabase Edge Functions
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v16 or higher)
+- Node.js (v16 or higher, recommended v18+)
 - npm or yarn
 - Git
+- Supabase account
+- OpenAI API key
 
-### Installation
+## Setup
 
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   ```
-
-2. Navigate to the project directory:
-   ```bash
    cd optima-assist-main
    ```
 
-3. Install dependencies:
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-4. Set up environment variables:
+3. Set up environment variables:
    ```bash
    cp .env.example .env
    ```
-   Then edit the `.env` file with your actual credentials.
+   Edit the `.env` file with your actual credentials:
+   - Supabase project credentials
+   - OpenAI API key (for AI features)
+   - OAuth provider credentials (Google, Microsoft)
 
-### Development
+4. Set up Supabase Edge Functions:
+   If you want to use Supabase Edge Functions for AI integration:
+   ```bash
+   # Install Supabase CLI if you haven't already
+   npm install -g supabase
+   
+   # Set your OpenAI API key as a Supabase secret
+   supabase secrets set OPENAI_API_KEY=your_openai_api_key_here
+   
+   # Deploy the AI chat function
+   supabase functions deploy ai-chat
+   ```
+
+## Development
 
 Start the development server:
 ```bash
 npm run dev
 ```
+The app will be available at http://localhost:8080
 
-The application will be available at `http://localhost:8080`
-
-### Building for Production
+## Build for Production
 
 ```bash
 npm run build
 ```
+Outputs static files in `/dist`
 
-Preview the production build:
+## Preview Production Build
+
 ```bash
 npm run preview
 ```
 
-## Environment Variables
+## Linting
 
-Create a `.env` file in the root directory with the following variables:
-
-```env
-VITE_SUPABASE_PROJECT_ID=your_supabase_project_id
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
-VITE_SUPABASE_URL=https://your-project-id.supabase.co
-VITE_OPENAI_API_KEY=your_openai_api_key
-
-# OAuth Providers (optional)
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-VITE_MICROSOFT_CLIENT_ID=your_microsoft_client_id
+```bash
+npm run lint
 ```
 
-## Authentication
+## Technology Stack
 
-The platform supports multiple authentication methods:
-
-1. Email/Password authentication
-2. Google OAuth
-3. Microsoft OAuth (Azure AD)
-
-For detailed OAuth setup instructions, see [OAUTH_SETUP.md](OAUTH_SETUP.md).
-
-## AI Integration
-
-This project includes AI-powered features:
-
-1. **AI Assistant** - General purpose chat assistant
-2. **Auto-Calendar Optimization** - Intelligent focus time blocking
-3. **Post-Meeting Task Automation** - Creates tasks from action items
-4. **Smart Document Generation** - Generates documents from discussions
-
-For AI setup instructions, see:
-- [AI_INTEGRATION.md](AI_INTEGRATION.md) - How to set up AI features
-- [DEPLOY_AI.md](DEPLOY_AI.md) - How to deploy AI features
+- **Frontend**: React 18, TypeScript, Vite 5.4.19, shadcn-ui, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Supabase Auth, Edge Functions)
+- **AI Integration**: OpenAI API
+- **State Management**: React Query, React Hook Form + Zod
+- **Routing**: react-router-dom v6.30.1
 
 ## Project Structure
 
 ```
 src/
-├── components/        # React components
-├── hooks/             # Custom React hooks
-├── integrations/      # Third-party service integrations
-├── lib/               # Utility functions and libraries
-├── pages/             # Page components
-├── routes/            # Routing configuration
-└── types/             # TypeScript types
+├── components/          # Reusable UI components
+├── hooks/               # Custom React hooks
+├── integrations/        # Supabase client and type definitions
+├── lib/                 # Utility functions
+├── pages/               # Top-level route components
+supabase/
+├── functions/           # Serverless Edge Functions
+├── migrations/          # Database schema migrations
 ```
 
 ## Deployment
 
-This project is designed to be deployed via Lovable.dev:
-
+The application can be deployed to any static hosting service (e.g., Vercel, Netlify) with Supabase backend integration. Edge Functions must be deployed to Supabase for AI features.
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a pull request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a pull request
 
-## Security
+## License
 
-- Never commit actual API keys or secrets to version control
-- Use environment variables for sensitive data
-- Review the [security guidelines](SECURITY.md) for more information
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Support
 
-For support, please contact the project maintainers or open an issue in the repository.
+For support, please open an issue on the GitHub repository.

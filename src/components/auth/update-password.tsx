@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Brain, Loader2, CheckCircle2, X, Check, Eye, EyeOff, Shield, AlertCircle, Lock, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const UpdatePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -12,7 +14,7 @@ const UpdatePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [updateComplete, setUpdateComplete] = useState(false);
-  const [validSession, setValidSession] = useState(null);
+  const [validSession, setValidSession] = useState<boolean | null>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -28,10 +30,18 @@ const UpdatePassword = () => {
   });
 
   useEffect(() => {
-    // Simulate session check
-    setTimeout(() => {
-      setValidSession(true);
-    }, 1000);
+    // Check if user has a valid session
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setValidSession(!!session);
+      } catch (err) {
+        console.error("Session check error:", err);
+        setValidSession(false);
+      }
+    };
+
+    checkSession();
   }, []);
 
   useEffect(() => {
@@ -56,35 +66,67 @@ const UpdatePassword = () => {
   const strength = getPasswordStrength();
   const strengthPercentage = (Object.values(passwordCriteria).filter(Boolean).length / 5) * 100;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!currentPassword) {
-      alert("Please enter your current password");
+      toast.error("Please enter your current password");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("New passwords do not match");
+      toast.error("New passwords do not match");
       return;
     }
 
     if (!Object.values(passwordCriteria).every(Boolean)) {
-      alert("Please meet all password requirements");
+      toast.error("Please meet all password requirements");
       return;
     }
 
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // First, verify the current password by signing in
+      const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
+        email: (await supabase.auth.getUser()).data.user?.email || '',
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        console.error("Current password verification error:", signInError);
+        toast.error("Current password is incorrect");
+        setLoading(false);
+        return;
+      }
+
+      // If current password is correct, update to the new password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (updateError) {
+        console.error("Password update error:", updateError);
+        toast.error(updateError.message || "Failed to update password. Please try again.");
+        setLoading(false);
+      } else {
+        toast.success("Password updated successfully!");
+        setUpdateComplete(true);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred. Please try again.");
       setLoading(false);
-      setUpdateComplete(true);
-    }, 1500);
+    }
   };
 
   const handleBackToDashboard = () => {
     navigate("/dashboard");
+  };
+
+  const handleSignIn = () => {
+    navigate("/auth/login");
   };
 
   // Loading state
@@ -132,7 +174,7 @@ const UpdatePassword = () => {
                 <p className="text-slate-400">You must be signed in to update your password.</p>
               </div>
               <Button
-                onClick={handleBackToDashboard}
+                onClick={handleSignIn}
                 className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-slate-100 font-semibold rounded-xl transition-all"
               >
                 Sign In

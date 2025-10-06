@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Brain, Loader2, Mail, User, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Register = () => {
   const [loading, setLoading] = useState(false);
@@ -19,47 +20,66 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
-      },
-    });
+      });
 
-    if (error) {
-      alert(error.message);
+      if (error) {
+        console.error("Registration error:", error);
+        toast.error(error.message || "Failed to create account. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        toast.success("Account created successfully! Please check your email to confirm your account.");
+        // Redirect to login page after successful registration
+        navigate("/auth/login");
+      }
+    } catch (error) {
+      console.error("Unexpected error during registration:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setLoading(false);
-    alert("Account created successfully! Please check your email to confirm your account.");
   };
 
   const handleOAuthSignup = async (provider: 'google' | 'microsoft') => {
     setOauthLoading(provider);
     
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider === 'google' ? 'google' : 'azure',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === 'google' ? 'google' : 'azure',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      alert(error.message);
+      if (error) {
+        console.error("OAuth error:", error);
+        toast.error(error.message || `Failed to sign up with ${provider}.`);
+        setOauthLoading(null);
+        return;
+      }
+
+      // The OAuth flow will redirect the user, so we don't need to do anything here
+    } catch (error) {
+      console.error("Unexpected OAuth error:", error);
+      toast.error(`An unexpected error occurred with ${provider} sign up.`);
       setOauthLoading(null);
-      return;
     }
-
-    // The OAuth flow will redirect the user, so we don't need to do anything here
   };
 
   const handleSignIn = () => {
-    navigate("/auth");
+    navigate("/auth/login");
   };
 
   return (

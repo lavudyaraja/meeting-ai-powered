@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Brain, Loader2, CheckCircle2, X, Check, Eye, EyeOff, Shield, AlertCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetComplete, setResetComplete] = useState(false);
-  const [validToken, setValidToken] = useState(null);
+  const [validToken, setValidToken] = useState<boolean | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Password strength criteria
   const [passwordCriteria, setPasswordCriteria] = useState({
@@ -26,11 +29,36 @@ const ResetPassword = () => {
   });
 
   useEffect(() => {
-    // Simulate token validation
-    setTimeout(() => {
-      setValidToken(true);
-    }, 1000);
-  }, []);
+    // Check if we have a valid token
+    const checkToken = async () => {
+      try {
+        // Get the access token from URL params
+        const accessToken = searchParams.get('access_token');
+        
+        if (accessToken) {
+          // Set the session with the access token to validate it
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: '', // We don't have the refresh token, but that's okay for validation
+          });
+          
+          if (error) {
+            console.error("Token validation error:", error);
+            setValidToken(false);
+          } else {
+            setValidToken(true);
+          }
+        } else {
+          setValidToken(false);
+        }
+      } catch (err) {
+        console.error("Unexpected error during token validation:", err);
+        setValidToken(false);
+      }
+    };
+
+    checkToken();
+  }, [searchParams]);
 
   useEffect(() => {
     // Check password criteria
@@ -54,30 +82,45 @@ const ResetPassword = () => {
   const strength = getPasswordStrength();
   const strengthPercentage = (Object.values(passwordCriteria).filter(Boolean).length / 5) * 100;
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     if (!Object.values(passwordCriteria).every(Boolean)) {
-      alert("Please meet all password requirements");
+      toast.error("Please meet all password requirements");
       return;
     }
 
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Update the user's password
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+
+      if (error) {
+        console.error("Password update error:", error);
+        toast.error(error.message || "Failed to update password. Please try again.");
+        setLoading(false);
+      } else {
+        toast.success("Password updated successfully!");
+        setResetComplete(true);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred. Please try again.");
       setLoading(false);
-      setResetComplete(true);
-    }, 1500);
+    }
   };
 
   const handleBackToLogin = () => {
-    navigate("/auth");
+    navigate("/auth/login");
   };
 
   // Loading state
@@ -125,7 +168,7 @@ const ResetPassword = () => {
                 <p className="text-slate-400">This password reset link is invalid or has expired.</p>
               </div>
               <Button
-                onClick={handleBackToLogin}
+                onClick={() => navigate("/auth/forgot-password")}
                 className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-slate-100 font-semibold rounded-xl transition-all"
               >
                 Request New Reset Link

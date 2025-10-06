@@ -1,78 +1,144 @@
-// Keep the XHR import which is still needed for fetch in Deno
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-
-// Get the OpenAI API key from environment variables
-// This should be set in your Supabase project settings
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-
-// Check if API key is set
-if (!openAIApiKey) {
-  console.error('OPENAI_API_KEY environment variable is not set');
-}
+// Import necessary modules for Supabase Edge Functions
+// @ts-ignore - Deno imports are not recognized by Node.js TypeScript
+import { serve } from "std/http/server.ts";
+// @ts-ignore - Deno imports are not recognized by Node.js TypeScript
+import OpenAI from "openai";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Use Deno.serve directly as shown in Supabase documentation
-Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+serve(async (_req) => {
+  console.log("Function invoked with method:", _req.method);
+  
+  if (_req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  // Check if API key is available
-  if (!openAIApiKey) {
-    return new Response(JSON.stringify({ error: 'OpenAI API key is not configured' }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+  if (_req.method !== "POST") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed. Use POST." }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" }, 
+        status: 405 
+      }
+    );
   }
 
   try {
-    const { messages } = await req.json();
+    // Get the OpenAI API key from environment variables
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    
+    console.log("Function started, API key present:", !!OPENAI_API_KEY);
 
-    console.log('Received chat request with messages:', messages.length);
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are an intelligent meeting assistant. Help users schedule meetings, manage tasks, and provide insights about their workflow. Be concise and helpful.' 
-          },
-          ...messages
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${response.status}`);
+    // Check if the API key is available
+    if (!OPENAI_API_KEY) {
+      const errorMsg = "Missing OPENAI_API_KEY environment variable";
+      console.error(errorMsg);
+      return new Response(
+        JSON.stringify({ 
+          error: errorMsg,
+          suggestion: "Please set the OPENAI_API_KEY as a Supabase secret using: npx supabase secrets set OPENAI_API_KEY=your_key_here"
+        }),
+        { 
+          headers: { ...corsHeaders, "Content-Type": "application/json" }, 
+          status: 500 
+        }
+      );
     }
 
-    const data = await response.json();
-    const generatedText = data.choices[0].message.content;
+    // Parse the request body
+    let requestData;
+    try {
+      requestData = await _req.json();
+      console.log("Received request data:", JSON.stringify(requestData, null, 2));
+    } catch (parseError) {
+      const errorMsg = "Invalid JSON in request body";
+      console.error(errorMsg, parseError);
+      return new Response(
+        JSON.stringify({ error: errorMsg }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+    
+    const { messages } = requestData;
+    
+    // Validate messages
+    if (!messages || !Array.isArray(messages)) {
+      const errorMsg = "Messages are required and must be an array";
+      console.error(errorMsg);
+      return new Response(
+        JSON.stringify({ error: errorMsg }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
 
-    console.log('AI response generated successfully');
+    // Create OpenAI client
+    console.log("Creating OpenAI client...");
+    // @ts-ignore - Deno runtime will handle this correctly
+    const openai = new OpenAI({
+      apiKey: OPENAI_API_KEY,
+    });
 
-    return new Response(JSON.stringify({ message: generatedText }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Call OpenAI API
+    console.log("Calling OpenAI API with messages:", JSON.stringify(messages, null, 2));
+    // @ts-ignore - Deno runtime will handle this correctly
+    const chatCompletion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 500,
     });
-  } catch (error: any) {
-    console.error('Error in ai-chat function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+
+    console.log("OpenAI API response received:", JSON.stringify(chatCompletion, null, 2));
+    
+    // Extract the response
+    const response = chatCompletion.choices[0]?.message?.content || "No response from AI";
+
+    // Return the response
+    return new Response(
+      JSON.stringify({ message: response }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
+    );
+  } catch (error) {
+    console.error("Error in AI chat function:", error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    const errorStack = error instanceof Error ? error.stack : "";
+    
+    // Check if this is an OpenAI API error
+    let detailedError = errorMessage;
+    let errorCode = "unknown_error";
+    
+    if (error instanceof Error && 'status' in error) {
+      // @ts-ignore - accessing status property
+      detailedError += ` (Status: ${error.status})`;
+      // @ts-ignore - accessing status property
+      errorCode = error.status;
+    }
+    
+    // Handle specific OpenAI errors
+    let userFriendlyMessage = "An error occurred while processing your request";
+    
+    if (errorMessage.includes("insufficient_quota")) {
+      userFriendlyMessage = "OpenAI API quota exceeded. Please check your OpenAI plan and billing details.";
+    } else if (errorMessage.includes("rate_limit_exceeded")) {
+      userFriendlyMessage = "Rate limit exceeded. Please wait a moment and try again.";
+    } else if (errorMessage.includes("invalid_api_key")) {
+      userFriendlyMessage = "Invalid OpenAI API key. Please check your API key configuration.";
+    }
+    
+    return new Response(
+      JSON.stringify({ 
+        error: userFriendlyMessage,
+        details: detailedError,
+        code: errorCode,
+        stack: errorStack
+      }),
+      { 
+        headers: { ...corsHeaders, "Content-Type": "application/json" }, 
+        status: 500 
+      }
+    );
   }
 });

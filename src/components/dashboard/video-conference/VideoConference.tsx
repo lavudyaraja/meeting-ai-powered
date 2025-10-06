@@ -42,6 +42,7 @@ import {
   Camera,
   Volume2
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 // Interfaces
 interface Participant {
@@ -337,37 +338,32 @@ const VideoConference = () => {
 Return only the translated text without any additional formatting or explanation.`;
       
       // Call OpenAI API through Supabase Edge Functions
-      const response = await fetch('/functions/v1/ai-chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('ai-chat', {
+        body: {
           messages: [
             {
               role: "user",
               content: prompt
             }
           ]
-        })
+        }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const translatedText = data.message || data.choices?.[0]?.message?.content || textContent;
+      if (error) {
+        console.error('Translation API error:', error);
+        // If translation fails, keep the original text
+        setTranslatedTranscripts(prev => ({
+          ...prev,
+          [text]: text
+        }));
+      } else {
+        const translatedText = data.message || textContent;
         
         // Store the translated text with a timestamp-based key
         const timestamp = text.split(': ')[0];
         setTranslatedTranscripts(prev => ({
           ...prev,
           [text]: timestamp + ': ' + translatedText
-        }));
-      } else {
-        console.error('Translation API error:', response.status, response.statusText);
-        // If translation fails, keep the original text
-        setTranslatedTranscripts(prev => ({
-          ...prev,
-          [text]: text
         }));
       }
     } catch (error) {

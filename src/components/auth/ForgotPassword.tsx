@@ -6,59 +6,62 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Brain, Loader2, Mail, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/update-password`,
       });
 
       if (error) {
-        setError(error.message);
+        console.error("Reset password error:", error);
+        toast.error(error.message || "Failed to send reset instructions. Please try again.");
         setLoading(false);
       } else {
+        toast.success("Password reset instructions sent! Check your email.");
         setSubmitted(true);
         setLoading(false);
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      console.error("Unexpected error:", err);
+      toast.error("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
 
   const handleBackToLogin = () => {
-    navigate("/auth");
+    navigate("/auth/login");
   };
 
   const handleResendEmail = async () => {
     setLoading(true);
-    setError(null);
     
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/auth/update-password`,
       });
 
       if (error) {
-        setError(error.message);
+        console.error("Resend error:", error);
+        toast.error(error.message || "Failed to resend email. Please try again.");
         setLoading(false);
       } else {
-        alert("Reset email resent!");
+        toast.success("Reset email resent! Check your inbox.");
         setLoading(false);
       }
     } catch (err) {
-      setError("Failed to resend email. Please try again.");
+      console.error("Unexpected error:", err);
+      toast.error("Failed to resend email. Please try again.");
       setLoading(false);
     }
   };
@@ -105,13 +108,6 @@ const ForgotPassword = () => {
                     No worries! Enter your email address and we'll send you instructions to reset your password.
                   </p>
                 </div>
-
-                {/* Error Message */}
-                {error && (
-                  <div className="bg-red-600/10 border border-red-600/20 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-red-400">{error}</p>
-                  </div>
-                )}
 
                 {/* Info Alert */}
                 <div className="bg-indigo-600/10 border border-indigo-600/20 rounded-xl p-4 mb-6 flex items-start gap-3">

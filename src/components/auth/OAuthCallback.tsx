@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
@@ -8,28 +9,32 @@ const OAuthCallback = () => {
   useEffect(() => {
     const handleOAuthCallback = async () => {
       try {
-        // Supabase automatically handles the OAuth callback
-        // We just need to wait for the session to be established
-        const { data, error } = await supabase.auth.getSession();
+        // Add a small delay to ensure Supabase has processed the OAuth callback
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if we have a session after the OAuth flow
+        const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error("OAuth callback error:", error);
-          alert("Authentication failed. Please try again.");
-          navigate("/auth");
+          toast.error("Authentication failed. Please try again.");
+          navigate("/auth/login");
           return;
         }
-
-        if (data.session) {
+        
+        if (session?.user) {
           // User is authenticated, redirect to dashboard
-          navigate("/dashboard");
+          toast.success("Login successful!");
+          navigate("/dashboard", { replace: true });
         } else {
           // No session, redirect to login
-          navigate("/auth");
+          toast.error("Authentication failed. Please try again.");
+          navigate("/auth/login");
         }
       } catch (err) {
         console.error("Unexpected error during OAuth callback:", err);
-        alert("An unexpected error occurred. Please try again.");
-        navigate("/auth");
+        toast.error("An unexpected error occurred. Please try again.");
+        navigate("/auth/login");
       }
     };
 

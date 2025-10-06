@@ -18,7 +18,7 @@ const Navigation = () => {
 
   const toolsItems = [
     { name: "Recordings", path: "/recordings", icon: PlayCircle },
-    { name: "AI Assistant", path: "/ai-assistant", icon: Bot },
+    { name: "AI Assistant", path: "/ai-meeting-assistant", icon: Bot },
     { name: "Integrations", path: "/integrations", icon: Puzzle },
   ];
 

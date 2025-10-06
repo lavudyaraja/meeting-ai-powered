@@ -1,56 +1,78 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Brain, Loader2, Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const [oauthLoading, setOauthLoading] = useState(null);
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      alert(error.message);
+      if (error) {
+        console.error("Login error:", error);
+        toast.error(error.message || "Failed to sign in. Please check your credentials.");
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        toast.success("Login successful!");
+        // Navigate to the intended page or dashboard
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      console.error("Unexpected error during login:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setLoading(false);
-    // User is automatically redirected by ProtectedRoute
-    alert("Login successful!");
   };
 
   const handleOAuthLogin = async (provider: 'google' | 'microsoft') => {
     setOauthLoading(provider);
     
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: provider === 'google' ? 'google' : 'azure',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === 'google' ? 'google' : 'azure',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      alert(error.message);
+      if (error) {
+        console.error("OAuth error:", error);
+        toast.error(error.message || `Failed to sign in with ${provider}.`);
+        setOauthLoading(null);
+        return;
+      }
+
+      // The OAuth flow will redirect the user, so we don't need to do anything here
+    } catch (error) {
+      console.error("Unexpected OAuth error:", error);
+      toast.error(`An unexpected error occurred with ${provider} sign in.`);
       setOauthLoading(null);
-      return;
     }
-
-    // The OAuth flow will redirect the user, so we don't need to do anything here
   };
 
   const handleForgotPassword = () => {
@@ -59,10 +81,6 @@ const Login = () => {
 
   const handleSignUp = () => {
     navigate("/auth/register");
-  };
-
-  const handleUpdatePassword = () => {
-    navigate("/auth/update-password");
   };
 
   return (
@@ -189,7 +207,7 @@ const Login = () => {
                 </div>
 
                 {/* Email/Password Form */}
-                <div className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-slate-300 font-medium">
                       Email Address
@@ -231,7 +249,6 @@ const Login = () => {
 
                   <Button
                     type="submit"
-                    onClick={handleSubmit}
                     className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-slate-100 font-semibold rounded-xl transition-all"
                     disabled={loading || oauthLoading !== null}
                   >
@@ -244,7 +261,7 @@ const Login = () => {
                       "Sign In"
                     )}
                   </Button>
-                </div>
+                </form>
 
                 {/* Footer Links */}
                 <div className="mt-8 text-center space-y-3">

@@ -10,11 +10,8 @@ import Settings from "./pages/Settings";
 import AIMeetingAssistant from "./pages/AIMeetingAssistant";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
-import ForgotPassword from "./components/auth/ForgotPassword";
-import ResetPassword from "./components/auth/ResetPassword";
-import UpdatePassword from "./components/auth/update-password";
-import OAuthCallback from "./components/auth/OAuthCallback";
 import { TeamTest } from "@/components/dashboard/team";
+import MeetingShowcase from "./components/meetings/MeetingShowcase";
 
 const queryClient = new QueryClient();
 
@@ -27,10 +24,6 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth/*" element={<Auth />} />
-          <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-          <Route path="/auth/reset-password" element={<ResetPassword />} />
-          <Route path="/auth/update-password" element={<UpdatePassword />} />
-          <Route path="/auth/callback" element={<OAuthCallback />} />
           <Route
             path="/dashboard"
             element={
@@ -60,6 +53,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/meeting-showcase"
+            element={
+              <ProtectedRoute>
+                <MeetingShowcase />
               </ProtectedRoute>
             }
           />
