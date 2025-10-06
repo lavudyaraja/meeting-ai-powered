@@ -54,9 +54,8 @@ const Login = () => {
     
     try {
       // Determine the redirect URL based on the environment
-      const redirectUrl = window.location.origin.includes('localhost') 
-        ? `${window.location.origin}/auth/callback`
-        : 'https://meet-ai-ufnk.vercel.app/auth/callback';
+      // Use a more flexible approach that works for both localhost and deployed environments
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       
       console.log("OAuth redirect URL:", redirectUrl);
       

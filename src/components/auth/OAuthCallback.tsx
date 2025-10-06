@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const OAuthCallback = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,7 +18,9 @@ const OAuthCallback = () => {
           if (session?.user) {
             // User is authenticated, redirect to dashboard
             toast.success("Login successful!");
-            navigate("/dashboard", { replace: true });
+            // Check if there's a redirect URL in the location state
+            const from = location.state?.from?.pathname || "/dashboard";
+            navigate(from, { replace: true });
           } else if (event === 'SIGNED_OUT') {
             // No session, redirect to login
             toast.error("Authentication failed. Please try again.");
@@ -32,7 +35,9 @@ const OAuthCallback = () => {
         if (session?.user) {
           // User is already authenticated, redirect to dashboard
           toast.success("Login successful!");
-          navigate("/dashboard", { replace: true });
+          // Check if there's a redirect URL in the location state
+          const from = location.state?.from?.pathname || "/dashboard";
+          navigate(from, { replace: true });
         }
 
         // Clean up subscription
@@ -49,7 +54,7 @@ const OAuthCallback = () => {
     };
 
     handleOAuthCallback();
-  }, [navigate]);
+  }, [navigate, location.state]);
 
   if (loading) {
     return (
