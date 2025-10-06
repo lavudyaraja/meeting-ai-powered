@@ -53,10 +53,15 @@ const Login = () => {
     setOauthLoading(provider);
     
     try {
+      // Determine the redirect URL based on the environment
+      const redirectUrl = window.location.origin.includes('localhost') 
+        ? 'http://localhost:8080/auth/callback' 
+        : 'https://meet-ai-ufnk.vercel.app/auth/callback';
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider === 'google' ? 'google' : 'azure',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
 
