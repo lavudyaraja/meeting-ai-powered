@@ -18,3 +18,8 @@ export { default as ProjectXPlanApproved } from './Deliverables/ProjectX_Plan_Ap
 
 // Archive components
 export { default as ArchivedMeetings2024Q4 } from './Archive/2024_Q4_Meetings';
+
+// Participants components
+export { default as ParticipantJoin } from './Participants/ParticipantJoin';
+export { default as ParticipantList } from './Participants/ParticipantList';
+export { default as ParticipantInvite } from './Participants/ParticipantInvite';

@@ -1,10 +1,22 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,7 +49,7 @@ const TaskDialog = ({ open, onOpenChange, task, onSuccess }: TaskDialogProps) =>
       setTitle(task.title);
       setDescription(task.description || "");
       setPriority(task.priority);
-      setDueDate(task.due_date ? task.due_date.split('T')[0] : "");
+      setDueDate(task.due_date ? task.due_date.split("T")[0] : "");
     } else {
       setTitle("");
       setDescription("");
@@ -51,7 +63,9 @@ const TaskDialog = ({ open, onOpenChange, task, onSuccess }: TaskDialogProps) =>
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       const taskData = {
@@ -72,10 +86,7 @@ const TaskDialog = ({ open, onOpenChange, task, onSuccess }: TaskDialogProps) =>
         if (error) throw error;
         toast({ title: "Task updated successfully" });
       } else {
-        const { error } = await supabase
-          .from("tasks")
-          .insert(taskData);
-
+        const { error } = await supabase.from("tasks").insert(taskData);
         if (error) throw error;
         toast({ title: "Task created successfully" });
       }
@@ -95,37 +106,66 @@ const TaskDialog = ({ open, onOpenChange, task, onSuccess }: TaskDialogProps) =>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-effect">
+      <DialogContent
+        className="
+          glass-effect 
+          w-[90vw] 
+          max-w-md 
+          sm:max-w-lg 
+          p-4 sm:p-6 
+          overflow-y-auto 
+          max-h-[90vh] 
+          rounded-2xl
+          border border-primary/20
+        "
+      >
         <DialogHeader>
-          <DialogTitle>{task ? "Edit Task" : "Create New Task"}</DialogTitle>
+          <DialogTitle className="text-xl font-semibold text-primary">
+            {task ? "Edit Task" : "Create New Task"}
+          </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          {/* Title */}
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title" className="text-primary font-medium">
+              Title
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="glass-effect"
+              className="bg-transparent border-primary/30 focus:border-primary w-full mt-1"
+              placeholder="Enter task title..."
             />
           </div>
+
+          {/* Description */}
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-primary font-medium">
+              Description
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="glass-effect"
+              className="bg-transparent border-primary/30 focus:border-primary w-full mt-1"
+              placeholder="Add details about the task..."
+              rows={3}
             />
           </div>
+
+          {/* Priority */}
           <div>
-            <Label htmlFor="priority">Priority</Label>
+            <Label htmlFor="priority" className="text-primary font-medium">
+              Priority
+            </Label>
             <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger className="glass-effect">
-                <SelectValue />
+              <SelectTrigger className="bg-transparent border-primary/30 focus:border-primary w-full mt-1">
+                <SelectValue placeholder="Select priority" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background/70 backdrop-blur-md border-primary/20">
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
@@ -133,22 +173,38 @@ const TaskDialog = ({ open, onOpenChange, task, onSuccess }: TaskDialogProps) =>
               </SelectContent>
             </Select>
           </div>
+
+          {/* Due Date */}
           <div>
-            <Label htmlFor="dueDate">Due Date</Label>
+            <Label htmlFor="dueDate" className="text-primary font-medium">
+              Due Date
+            </Label>
             <Input
               id="dueDate"
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="glass-effect"
+              className="bg-transparent border-primary/30 focus:border-primary w-full mt-1"
             />
           </div>
-          <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
+
+          {/* Footer */}
+          <DialogFooter className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto"
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="hero" disabled={loading}>
-              {loading ? "Saving..." : task ? "Update" : "Create"}
+            <Button
+              type="submit"
+              variant="hero"
+              disabled={loading}
+              className="w-full sm:w-auto"
+            >
+              {loading ? "Saving..." : task ? "Update Task" : "Create Task"}
             </Button>
           </DialogFooter>
         </form>

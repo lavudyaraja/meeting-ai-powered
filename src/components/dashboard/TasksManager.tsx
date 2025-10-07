@@ -183,182 +183,175 @@ const TasksManager = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Tasks</h2>
-          <p className="text-muted-foreground">Manage your action items</p>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            onClick={generateTaskSuggestions}
-            disabled={generatingSuggestions}
-          >
-            {generatingSuggestions ? "Generating..." : "AI Suggestions"}
-          </Button>
-          <Button variant="hero" onClick={() => { setSelectedTask(null); setDialogOpen(true); }}>
-            <Plus className="w-5 h-5" />
-            New Task
-          </Button>
-        </div>
-      </div>
+   <div className="space-y-6">
+  {/* Header */}
+  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div>
+      <h2 className="text-3xl font-bold">Tasks</h2>
+      <p className="text-muted-foreground">Manage your action items</p>
+    </div>
+    <div className="flex flex-col sm:flex-row lg:flex-row gap-2">
+      <Button
+        variant="outline"
+        onClick={generateTaskSuggestions}
+        disabled={generatingSuggestions}
+      >
+        {generatingSuggestions ? "Generating..." : "AI Suggestions"}
+      </Button>
+      <Button
+        variant="hero"
+        onClick={() => {
+          setSelectedTask(null);
+          setDialogOpen(true);
+        }}
+      >
+        <Plus className="w-5 h-5" />
+        New Task
+      </Button>
+    </div>
+  </div>
 
-      {/* AI Task Suggestions */}
-      {aiSuggestions.length > 0 && (
-        <Card className="glass-effect p-4 border-primary/20">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              AI Task Suggestions
-            </h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => setAiSuggestions([])}
+  {/* AI Task Suggestions */}
+  {aiSuggestions.length > 0 && (
+    <Card className="glass-effect p-4 border-primary/20">
+      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-3 gap-2">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          AI Task Suggestions
+        </h3>
+        <Button variant="ghost" size="sm" onClick={() => setAiSuggestions([])}>
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="flex flex-col lg:flex-row lg:flex-wrap gap-2">
+        {aiSuggestions.map((suggestion, index) => (
+          <div
+            key={index}
+            className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors gap-2 flex-1"
+          >
+            <span className="text-sm">{suggestion}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSelectedTask({
+                  id: "",
+                  title: suggestion,
+                  description: "",
+                  status: "pending",
+                  priority: "medium",
+                  due_date: null,
+                });
+                setDialogOpen(true);
+              }}
             >
-              <X className="w-4 h-4" />
+              Add Task
             </Button>
           </div>
-          <div className="space-y-2">
-            {aiSuggestions.map((suggestion, index) => (
-              <div 
-                key={index} 
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <span className="text-sm">{suggestion}</span>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => {
-                    setSelectedTask({
-                      id: '',
-                      title: suggestion,
-                      description: '',
-                      status: 'pending',
-                      priority: 'medium',
-                      due_date: null
-                    });
-                    setDialogOpen(true);
-                  }}
+        ))}
+      </div>
+    </Card>
+  )}
+
+  {/* Tasks Grid */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    {loading ? (
+      <Card className="glass-effect p-8 text-center">
+        <p className="text-muted-foreground">Loading tasks...</p>
+      </Card>
+    ) : tasks.length === 0 ? (
+      <Card className="glass-effect p-12 text-center">
+        <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-xl font-semibold mb-2">No tasks yet</h3>
+        <p className="text-muted-foreground mb-6">
+          AI will automatically create tasks from your meetings
+        </p>
+        <Button variant="hero">Create Task</Button>
+      </Card>
+    ) : (
+      tasks.map((task, index) => (
+        <Card
+          key={task.id}
+          className="glass-effect p-6 hover:shadow-glow transition-all animate-fade-in"
+          style={{ animationDelay: `${index * 0.05}s` }}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+            <button onClick={() => toggleTask(task.id, task.status)} className="mt-1">
+              {task.status === "completed" ? (
+                <CheckCircle className="w-5 h-5 text-primary" />
+              ) : (
+                <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
+              )}
+            </button>
+
+            <div className="flex-1 flex flex-col gap-2">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:gap-3">
+                <h3
+                  className={`text-lg font-semibold ${
+                    task.status === "completed"
+                      ? "line-through text-muted-foreground"
+                      : ""
+                  }`}
                 >
-                  Add Task
-                </Button>
+                  {task.title}
+                </h3>
+                <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
               </div>
-            ))}
+
+              {task.description && <p className="text-muted-foreground">{task.description}</p>}
+
+              {task.due_date && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  Due: {format(new Date(task.due_date), "MMM dd, yyyy")}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-row lg:flex-col gap-2 lg:gap-1">
+              <Button variant="ghost" size="icon" onClick={() => handleEdit(task)}>
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => handleShare(task)}>
+                <Share2 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setTaskToDelete(task.id);
+                  setDeleteDialogOpen(true);
+                }}
+              >
+                <Trash className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </Card>
-      )}
+      ))
+    )}
+  </div>
 
-      <div className="grid gap-4">
-        {loading ? (
-          <Card className="glass-effect p-8 text-center">
-            <p className="text-muted-foreground">Loading tasks...</p>
-          </Card>
-        ) : tasks.length === 0 ? (
-          <Card className="glass-effect p-12 text-center">
-            <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold mb-2">No tasks yet</h3>
-            <p className="text-muted-foreground mb-6">
-              AI will automatically create tasks from your meetings
-            </p>
-            <Button variant="hero">Create Task</Button>
-          </Card>
-        ) : (
-          tasks.map((task, index) => (
-            <Card
-              key={task.id}
-              className="glass-effect p-6 hover:shadow-glow transition-all animate-fade-in"
-              style={{ animationDelay: `${index * 0.05}s` }}
-            >
-              <div className="flex items-start gap-4">
-                <button
-                  onClick={() => toggleTask(task.id, task.status)}
-                  className="mt-1"
-                >
-                  {task.status === "completed" ? (
-                    <CheckCircle className="w-5 h-5 text-primary" />
-                  ) : (
-                    <Circle className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
-                  )}
-                </button>
+  {/* Dialogs */}
+  <TaskDialog open={dialogOpen} onOpenChange={setDialogOpen} task={selectedTask} onSuccess={fetchTasks} />
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3
-                      className={`text-lg font-semibold ${
-                        task.status === "completed"
-                          ? "line-through text-muted-foreground"
-                          : ""
-                      }`}
-                    >
-                      {task.title}
-                    </h3>
-                    <Badge className={getPriorityColor(task.priority)}>
-                      {task.priority}
-                    </Badge>
-                  </div>
+  <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+    <AlertDialogContent className="glass-effect">
+      <AlertDialogHeader>
+        <AlertDialogTitle>Delete Task</AlertDialogTitle>
+        <AlertDialogDescription>
+          Are you sure you want to delete this task? This action cannot be undone.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+</div>
 
-                  {task.description && (
-                    <p className="text-muted-foreground mb-3">
-                      {task.description}
-                    </p>
-                  )}
 
-                  {task.due_date && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      Due: {format(new Date(task.due_date), "MMM dd, yyyy")}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(task)}>
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleShare(task)}>
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => {
-                      setTaskToDelete(task.id);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <Trash className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
-
-      <TaskDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        task={selectedTask}
-        onSuccess={fetchTasks}
-      />
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="glass-effect">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Task</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this task? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
   );
 };
 

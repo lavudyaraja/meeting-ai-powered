@@ -12,7 +12,20 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import { TeamTest } from "@/components/dashboard/team";
 import MeetingShowcase from "./components/meetings/MeetingShowcase";
-
+import ParticipantJoinPage from "./pages/ParticipantJoinPage";
+// Dashboard components
+import DashboardOverview from "./components/dashboard/DashboardOverview";
+import MeetingsList from "./components/dashboard/MeetingsList";
+import TasksManager from "./components/dashboard/TasksManager";
+import VideoConference from "./components/dashboard/video-conference/VideoConference";
+import AIManagement from "./components/dashboard/ai-management/AIManagement";
+import Analytics from "./components/dashboard/Analytics";
+import TeamManagement from "./components/dashboard/team/TeamManagement";
+import TeamActivityFeed from "./components/dashboard/team/TeamActivityFeed";
+import DepartmentManagement from "./components/dashboard/team/DepartmentManagement";
+import RoleManagement from "./components/dashboard/team/RoleManagement";
+import RecordingsLibrary from "./components/dashboard/recordings/RecordingsLibrary";
+import AIAssistant from "./components/dashboard/AIAssistant";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -31,7 +44,21 @@ const App = () => (
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route index element={<DashboardOverview />} />
+            <Route path="overview" element={<DashboardOverview />} />
+            <Route path="meetings" element={<MeetingsList />} />
+            <Route path="tasks" element={<TasksManager />} />
+            <Route path="ai-assistant" element={<AIAssistant />} />
+            <Route path="video-conference" element={<VideoConference />} />
+            <Route path="ai-management" element={<AIManagement />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="team" element={<TeamManagement />} />
+            <Route path="activity" element={<TeamActivityFeed />} />
+            <Route path="departments" element={<DepartmentManagement />} />
+            <Route path="roles" element={<RoleManagement />} />
+            <Route path="recordings" element={<RecordingsLibrary />} />
+          </Route>
           <Route
             path="/team-test"
             element={
@@ -63,6 +90,10 @@ const App = () => (
                 <MeetingShowcase />
               </ProtectedRoute>
             }
+          />
+          <Route
+            path="/join-meeting"
+            element={<ParticipantJoinPage />}
           />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

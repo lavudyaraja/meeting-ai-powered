@@ -47,7 +47,7 @@ const MeetingDialog = ({ open, onOpenChange, onSuccess }: MeetingDialogProps) =>
       if (insertError) throw insertError;
 
       // Now update the meeting with the generated URL
-      const meetingUrl = `${window.location.origin}/dashboard#video?meetingId=${data.id}`;
+      const meetingUrl = `${window.location.origin}/join-meeting?meetingId=${data.id}`;
       
       const { error: updateError } = await supabase
         .from("meetings")

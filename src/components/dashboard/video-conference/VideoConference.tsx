@@ -43,6 +43,7 @@ import {
   Volume2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { ParticipantList } from "@/components/meetings";
 
 // Interfaces
 interface Participant {
@@ -105,6 +106,7 @@ const VideoConference = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null); // Selected subtitle language
   const [translatedTranscripts, setTranslatedTranscripts] = useState<{[key: string]: string}>({}); // Translated transcripts
   const [isHost, setIsHost] = useState(true); // Track if current user is host
+  const [currentUserId, setCurrentUserId] = useState<string>(""); // Current user ID
 
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -124,7 +126,6 @@ const VideoConference = () => {
     if (meetingIdFromUrl) {
       setMeetingId(meetingIdFromUrl);
       setIsJoining(true);
-      return;
     }
     
     // Then check sessionStorage (for join meeting flow)
@@ -135,8 +136,17 @@ const VideoConference = () => {
       setIsJoining(true);
       // Clear the sessionStorage so it's not used again
       sessionStorage.removeItem('meetingId');
-      return;
     }
+    
+    // Get current user ID
+    const fetchCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    
+    fetchCurrentUser();
   }, []);
 
   // Initialize local media
@@ -167,6 +177,25 @@ const VideoConference = () => {
       
       // Initialize speech recognition
       initializeSpeechRecognition();
+      
+      // Add host as participant if meetingId exists
+      if (meetingId && currentUserId) {
+        try {
+          const { error: participantError } = await supabase
+            .from("meeting_participants")
+            .upsert({
+              meeting_id: meetingId,
+              user_id: currentUserId,
+              status: "attended"
+            }, {
+              onConflict: "meeting_id,user_id"
+            });
+
+          if (participantError) throw participantError;
+        } catch (participantError) {
+          console.error("Error adding host as participant:", participantError);
+        }
+      }
       
       showToast("Meeting Started", "Your meeting has started successfully", "success");
     } catch (error) {
@@ -202,6 +231,44 @@ const VideoConference = () => {
       
       // Initialize speech recognition
       initializeSpeechRecognition();
+      
+      // Add user as participant if meetingId exists
+      if (meetingId && currentUserId) {
+        try {
+          // Add user as participant
+          const { error: participantError } = await supabase
+            .from("meeting_participants")
+            .upsert({
+              meeting_id: meetingId,
+              user_id: currentUserId,
+              status: "attended"
+            }, {
+              onConflict: "meeting_id,user_id"
+            });
+
+          if (participantError) throw participantError;
+
+          // Update meeting status if it's scheduled
+          const { data: meetingData, error: meetingError } = await supabase
+            .from("meetings")
+            .select("status")
+            .eq("id", meetingId)
+            .single();
+
+          if (meetingError) throw meetingError;
+
+          if (meetingData && meetingData.status === "scheduled") {
+            const { error: updateError } = await supabase
+              .from("meetings")
+              .update({ status: "in_progress" })
+              .eq("id", meetingId);
+
+            if (updateError) throw updateError;
+          }
+        } catch (participantError) {
+          console.error("Error updating participant status:", participantError);
+        }
+      }
       
       showToast("Joined Meeting", "You've successfully joined the meeting", "success");
     } catch (error) {
@@ -1031,28 +1098,8 @@ Return only the translated text without any additional formatting or explanation
               )}
 
               {/* Participants */}
-              {isParticipantsOpen && (
-                <ScrollArea className="flex-1">
-                  <div className="space-y-2">
-                    {participants.map(p => (
-                      <div key={p.id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-                            {p.name[0]}
-                          </div>
-                          <div>
-                            <p className="font-semibold text-sm text-purple-900">{p.name}</p>
-                            {p.isModerator && <Badge className="text-xs bg-amber-100 text-amber-700">Host</Badge>}
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          {p.isMuted && <MicOff className="w-4 h-4 text-red-500" />}
-                          {p.isVideoOff && <VideoOff className="w-4 h-4 text-red-500" />}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
+              {isParticipantsOpen && meetingId && (
+                <ParticipantList meetingId={meetingId} currentUserId={currentUserId} />
               )}
 
               {/* AI Insights */}
