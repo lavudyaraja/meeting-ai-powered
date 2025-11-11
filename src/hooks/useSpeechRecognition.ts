@@ -25,6 +25,7 @@ export const useSpeechRecognition = (options: UseSpeechRecognitionOptions = {}) 
   const [interimTranscript, setInterimTranscript] = useState<string>('');
   const [currentLanguage, setCurrentLanguage] = useState(options.language || 'en-US');
   const [error, setError] = useState<string | null>(null);
+  const [confidenceThreshold] = useState(0.7); // Minimum confidence threshold
   
   const serviceRef = useRef<SpeechRecognitionService | null>(null);
 
@@ -36,17 +37,23 @@ export const useSpeechRecognition = (options: UseSpeechRecognitionOptions = {}) 
       language: options.language || 'en-US',
       autoRestart: true,
       onTranscript: (segment) => {
-        if (segment.isFinal) {
-          setTranscripts(prev => [...prev, segment]);
-          setInterimTranscript('');
-          options.onFinalTranscript?.(segment);
-        } else {
-          setInterimTranscript(segment.text);
+        // Only show interim results with reasonable confidence or final results
+        if (segment.isFinal || segment.confidence >= confidenceThreshold) {
+          if (segment.isFinal) {
+            setTranscripts(prev => [...prev, segment]);
+            setInterimTranscript('');
+            options.onFinalTranscript?.(segment);
+          } else {
+            setInterimTranscript(segment.text);
+          }
+          options.onTranscript?.(segment);
         }
-        options.onTranscript?.(segment);
       },
       onFinalTranscript: (segment) => {
-        options.onFinalTranscript?.(segment);
+        // Apply confidence threshold for final transcripts as well
+        if (segment.confidence >= confidenceThreshold) {
+          options.onFinalTranscript?.(segment);
+        }
       },
       onError: (errorMsg) => {
         setError(errorMsg);
@@ -143,6 +150,19 @@ export const useSpeechRecognition = (options: UseSpeechRecognitionOptions = {}) 
     return transcripts.filter(t => t.speakerId === speakerId);
   }, [transcripts]);
 
+  // Get transcripts with confidence filtering
+  const getFilteredTranscripts = useCallback((minConfidence: number = confidenceThreshold) => {
+    return transcripts.filter(t => t.confidence >= minConfidence);
+  }, [transcripts, confidenceThreshold]);
+
+  // Get full transcript text with confidence filtering
+  const getFilteredFullTranscript = useCallback((minConfidence: number = confidenceThreshold) => {
+    return transcripts
+      .filter(t => t.confidence >= minConfidence)
+      .map(t => t.text)
+      .join(' ');
+  }, [transcripts, confidenceThreshold]);
+
   // Get supported languages
   const getSupportedLanguages = useCallback(() => {
     if (serviceRef.current) {
@@ -197,7 +217,9 @@ export const useSpeechRecognition = (options: UseSpeechRecognitionOptions = {}) 
     
     // Getters
     getFullTranscript,
+    getFilteredTranscript: getFilteredFullTranscript,
     getTranscriptsBySpeaker,
+    getFilteredTranscripts,
     getSupportedLanguages,
     exportTranscript,
     downloadTranscript,

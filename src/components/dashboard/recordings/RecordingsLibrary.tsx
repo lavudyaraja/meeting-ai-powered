@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
-import { useRecordings } from "@/hooks"; // Fixed import path
+import { useRecordings } from "@/hooks/use-recordings"; // Fixed import path
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";

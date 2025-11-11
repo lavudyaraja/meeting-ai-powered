@@ -1,29 +1,87 @@
-import React, { useState, useEffect } from "react";
-import { Brain, X, LayoutDashboard, Calendar, CheckCircle, Video, MessageSquare, Film, Settings, User, CreditCard, HelpCircle, LogOut, Moon, Sun, Bell, Menu } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Outlet } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Brain,
+  X,
+  LayoutDashboard,
+  Calendar,
+  CheckCircle,
+  Video,
+  MessageSquare,
+  Film,
+  Bell,
+  Menu,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  BarChart2,
+  Sparkles,
+} from "lucide-react";
+import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import ProfileDropdown from "@/components/dashboard/profile/ProfileDropdown";
 
-const DashboardLayout = ({ onPageChange }) => {
+interface DashboardLayoutProps {
+  onPageChange?: (path: string) => void;
+}
+
+interface UserProfile {
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+}
+
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  path: string;
+  badge?: number;
+}
+
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onPageChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // UI State
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [userProfile, setUserProfile] = useState({
+  const [searchOpen, setSearchOpen] = useState(false);
+  
+  // Data State
+  const [userProfile, setUserProfile] = useState<UserProfile>({
     full_name: "User",
     email: "",
-    avatar_url: null
+    avatar_url: null,
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [notificationCount, setNotificationCount] = useState(3);
 
-  // Load user profile from Supabase
+  // Menu Items
+  const menuItems: MenuItem[] = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
+    { id: "meetings", label: "Meetings", icon: Calendar, path: "/dashboard/meetings", badge: 2 },
+    { id: "tasks", label: "Tasks", icon: CheckCircle, path: "/dashboard/tasks", badge: 5 },
+    { id: "video", label: "Video Conference", icon: Video, path: "/dashboard/video-conference" },
+    { id: "ai-assistant", label: "AI Assistant", icon: MessageSquare, path: "/dashboard/ai-assistant" },
+    { id: "ai-features", label: "AI Features", icon: Sparkles, path: "/dashboard/ai-features" },
+    { id: "recordings", label: "Recordings", icon: Film, path: "/dashboard/recordings" },
+    { id: "advanced-meetings", label: "Advanced Insights", icon: Brain, path: "/dashboard/advanced-meetings" },
+  ];
+
+  // Load User Profile
   useEffect(() => {
     const loadUserProfile = async () => {
+      setIsLoading(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        if (!user) {
+          navigate("/auth/login");
+          return;
+        }
 
         const { data, error } = await supabase
           .from("profiles")
@@ -35,37 +93,36 @@ const DashboardLayout = ({ onPageChange }) => {
           setUserProfile({
             full_name: data.full_name || user.user_metadata?.full_name || "User",
             email: data.email || user.email || "",
-            avatar_url: data.avatar_url || null
+            avatar_url: data.avatar_url || null,
           });
         } else {
           setUserProfile({
             full_name: user.user_metadata?.full_name || "User",
             email: user.email || "",
-            avatar_url: null
+            avatar_url: null,
           });
         }
       } catch (error) {
         console.error("Error loading user profile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadUserProfile();
 
+    // Real-time profile updates
     const profileChannel = supabase
-      .channel('profile_changes')
+      .channel("profile_changes")
       .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-        },
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles" },
         (payload) => {
-          setUserProfile(prev => ({
+          setUserProfile((prev) => ({
             ...prev,
             full_name: payload.new.full_name || prev.full_name,
             email: payload.new.email || prev.email,
-            avatar_url: payload.new.avatar_url || prev.avatar_url
+            avatar_url: payload.new.avatar_url || prev.avatar_url,
           }));
         }
       )
@@ -74,108 +131,106 @@ const DashboardLayout = ({ onPageChange }) => {
     return () => {
       supabase.removeChannel(profileChannel);
     };
-  }, []);
+  }, [navigate]);
 
-  const menuItems = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard, path: "/dashboard" },
-    { id: "meetings", label: "Meetings", icon: Calendar, path: "/dashboard/meetings" },
-    { id: "tasks", label: "Tasks", icon: CheckCircle, path: "/dashboard/tasks" },
-    { id: "video", label: "Video Conference", icon: Video, path: "/dashboard/video-conference" },
-    { id: "ai-assistant", label: "AI Assistant", icon: MessageSquare, path: "/dashboard/ai-assistant" },
-    { id: "recordings", label: "Recordings", icon: Film, path: "/dashboard/recordings" },
-  ];
-
-  const profileMenuItems = [
-    { id: "view-profile", label: "View Profile", icon: User, description: "Name, email, role", path: "/dashboard/profile" },
-    { id: "settings", label: "Settings", icon: Settings, description: "Account & privacy", path: "/dashboard/settings" },
-    { id: "billing", label: "Subscriptions", icon: CreditCard, description: "Plan & invoices", path: "/dashboard/billing" },
-    { id: "support", label: "Support", icon: HelpCircle, description: "Help & feedback", path: "/dashboard/support" },
-  ];
-
+  // Responsive handling
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
       if (window.innerWidth >= 1024) {
         setSidebarOpen(false);
+      }
+      // Auto-collapse on medium screens
+      if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
+        setSidebarCollapsed(true);
       }
     };
     
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const handleNavigation = (path) => {
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K for search
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      // Cmd/Ctrl + B to toggle sidebar
+      if ((e.metaKey || e.ctrlKey) && e.key === "b") {
+        e.preventDefault();
+        if (!isMobile) {
+          setSidebarCollapsed(!sidebarCollapsed);
+        }
+      }
+      // Escape to close modals
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        if (isMobile) {
+          setSidebarOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isMobile, sidebarCollapsed]);
+
+  // Navigation handler
+  const handleNavigation = useCallback((path: string) => {
     navigate(path);
     if (isMobile) setSidebarOpen(false);
     if (onPageChange) onPageChange(path);
-  };
+  }, [navigate, isMobile, onPageChange]);
 
-  const handleProfileAction = async (actionId, path) => {
-    if (path) {
-      navigate(path);
-    } else if (actionId === "logout") {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Error logging out:", error);
-      } else {
-        navigate("/auth/login");
-      }
-    } else if (actionId === "theme-toggle") {
-      setDarkMode(!darkMode);
+  // Logout handler
+  const handleLogout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Error logging out:", error);
+      throw error;
     }
-    setProfileOpen(false);
-    if (onPageChange) onPageChange(actionId);
+    navigate("/auth/login");
+  }, [navigate]);
+
+  // Get user initials
+  const getUserInitials = (name: string) => {
+    if (!name) return "U";
+    return name.split(" ").map((n) => n[0]).join("").toUpperCase().substring(0, 2);
   };
-
-  const getUserInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileOpen && !event.target.closest('.sidebar-footer')) {
-        setProfileOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [profileOpen]);
-
-  useEffect(() => {
-    if (isMobile && sidebarOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobile, sidebarOpen]);
 
   return (
     <div className="h-screen flex bg-gradient-to-br from-slate-950 via-blue-950 to-slate-950 overflow-hidden">
       {/* Mobile Overlay */}
       {isMobile && sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 bg-slate-900/95 backdrop-blur-xl border-r border-cyan-400/30 transform transition-all duration-300 flex flex-col
-          ${isMobile 
-            ? `w-80 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
-            : `${sidebarCollapsed ? 'w-20' : 'w-72'} translate-x-0`
+        className={`fixed inset-y-0 left-0 z-50 bg-slate-900/95 backdrop-blur-xl border-r border-cyan-400/30 transform transition-all duration-300 ease-in-out flex flex-col shadow-2xl shadow-black/50
+          ${isMobile
+            ? `w-80 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`
+            : `${sidebarCollapsed ? "w-20" : "w-72"} translate-x-0`
           }`}
       >
-        {/* Logo */}
-        <div className={`flex items-center ${sidebarCollapsed && !isMobile ? "justify-center" : "justify-between"} px-4 py-4 border-b border-slate-800/50`}>
-          <div 
+        {/* Sidebar gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+
+        {/* Logo Header */}
+        <div
+          className={`relative flex items-center ${
+            sidebarCollapsed && !isMobile ? "justify-center px-2" : "justify-between px-4"
+          } py-4 border-b border-slate-800/50 bg-slate-900/50`}
+        >
+          <div
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => {
               if (location.pathname !== "/dashboard") {
@@ -185,7 +240,7 @@ const DashboardLayout = ({ onPageChange }) => {
               }
             }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg shadow-cyan-500/30">
               <Brain className="w-6 h-6 text-white" />
             </div>
             {(!sidebarCollapsed || isMobile) && (
@@ -194,81 +249,122 @@ const DashboardLayout = ({ onPageChange }) => {
               </span>
             )}
           </div>
-          {isMobile && (
-            <button 
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors" 
+          
+          {isMobile ? (
+            <button
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="w-5 h-5 text-slate-300" />
             </button>
+          ) : (
+            !sidebarCollapsed && (
+              <button
+                className="p-2 hover:bg-slate-800 rounded-lg transition-all duration-200 group"
+                onClick={() => setSidebarCollapsed(true)}
+                title="Collapse sidebar (Ctrl+B)"
+              >
+                <ChevronLeft className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition-colors" />
+              </button>
+            )
           )}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-hidden">
-          <div className="space-y-1">
+        {/* Expand Button (when collapsed) */}
+        {!isMobile && sidebarCollapsed && (
+          <button
+            className="absolute -right-3 top-20 w-6 h-6 bg-slate-800 border border-cyan-400/30 rounded-full flex items-center justify-center hover:bg-slate-700 transition-all duration-200 hover:scale-110 z-10 shadow-lg"
+            onClick={() => setSidebarCollapsed(false)}
+            title="Expand sidebar (Ctrl+B)"
+          >
+            <ChevronRight className="w-3 h-3 text-cyan-400" />
+          </button>
+        )}
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar relative">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+            
             return (
-              <div key={item.id} className="relative group/item">
-                <button
-                  onClick={() => handleNavigation(item.path)}
-                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
-                    isActive
-                      ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200"
-                      : "hover:bg-slate-800/50 text-slate-300 hover:text-cyan-300"
+              <button
+                key={item.id}
+                onClick={() => handleNavigation(item.path)}
+                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
+                  ${isActive
+                    ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-200 shadow-lg shadow-cyan-500/10"
+                    : "hover:bg-slate-800/50 text-slate-300 hover:text-cyan-300"
                   } ${sidebarCollapsed && !isMobile ? "justify-center" : ""}`}
-                >
-                  <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? "text-cyan-400" : "text-slate-400 group-hover:text-cyan-400"}`} />
-                  {(!sidebarCollapsed || isMobile) && (
-                    <span className={`font-semibold text-sm truncate ${isActive ? "text-cyan-300" : "group-hover:text-cyan-300"}`}>
-                      {item.label}
+                title={sidebarCollapsed && !isMobile ? item.label : undefined}
+              >
+                {/* Active indicator */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full" />
+                )}
+                
+                <div className="relative">
+                  <Icon
+                    className={`w-5 h-5 flex-shrink-0 transition-all duration-200 ${
+                      isActive 
+                        ? "text-cyan-400 scale-110" 
+                        : "text-slate-400 group-hover:text-cyan-400 group-hover:scale-110"
+                    }`}
+                  />
+                  {item.badge && item.badge > 0 && (!sidebarCollapsed || isMobile) && (
+                    <span className="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                      {item.badge > 9 ? '9+' : item.badge}
                     </span>
                   )}
-                  {isActive && (!sidebarCollapsed || isMobile) && (
-                    <div className="ml-auto w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                  )}
-                </button>
+                </div>
                 
-                {/* Tooltip for collapsed sidebar */}
-                {sidebarCollapsed && !isMobile && (
-                  <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-slate-800 text-slate-200 text-sm font-semibold rounded-lg shadow-xl opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-200 whitespace-nowrap z-[60] pointer-events-none">
-                    {item.label}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-800"></div>
+                {(!sidebarCollapsed || isMobile) && (
+                  <div className="flex items-center justify-between flex-1 min-w-0">
+                    <span
+                      className={`font-semibold text-sm truncate transition-colors ${
+                        isActive ? "text-cyan-300" : "group-hover:text-cyan-300"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="ml-auto px-2 py-0.5 bg-rose-500/20 text-rose-400 text-xs font-bold rounded-full border border-rose-500/30">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
-          </div>
         </nav>
 
-        {/* Footer */}
-        <div className="px-3 pb-4 border-t border-slate-800/50 pt-4 sidebar-footer relative">
+        {/* User Profile Footer */}
+        <div className="relative px-3 pb-4 border-t border-slate-800/50 pt-4 bg-slate-900/50">
           <button
-            className={`w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl transition-all duration-200 ${
-              sidebarCollapsed && !isMobile ? "justify-center" : ""
-            }`}
             onClick={() => setProfileOpen(!profileOpen)}
+            className={`w-full flex items-center gap-3 p-3 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group ${
+              sidebarCollapsed && !isMobile ? "justify-center" : ""
+            } ${profileOpen ? "bg-slate-800/50" : ""}`}
           >
             <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center text-white font-bold ring-2 ring-cyan-400/30 ring-offset-2 ring-offset-slate-900 group-hover:ring-cyan-400/50 transition-all">
                 {userProfile.avatar_url ? (
-                  <img 
-                    src={userProfile.avatar_url} 
-                    alt={userProfile.full_name} 
+                  <img
+                    src={userProfile.avatar_url}
+                    alt={userProfile.full_name}
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
                   <span className="text-sm">{getUserInitials(userProfile.full_name)}</span>
                 )}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 shadow-lg shadow-emerald-400/50" />
             </div>
+            
             {(!sidebarCollapsed || isMobile) && (
               <div className="flex-1 text-left min-w-0">
-                <div className="text-sm font-semibold text-slate-200 truncate">
+                <div className="text-sm font-semibold text-slate-200 truncate group-hover:text-cyan-300 transition-colors">
                   {userProfile.full_name}
                 </div>
                 <div className="text-xs text-slate-400">View Profile</div>
@@ -277,111 +373,33 @@ const DashboardLayout = ({ onPageChange }) => {
           </button>
 
           {/* Profile Dropdown */}
-          {profileOpen && (
-            <div 
-              className={`absolute bg-slate-900/98 backdrop-blur-xl border border-cyan-400/30 rounded-2xl shadow-2xl shadow-black/50 z-[60] w-72
-                ${sidebarCollapsed && !isMobile
-                  ? "left-full ml-2 bottom-0" 
-                  : "bottom-full mb-2 left-3 right-3"
-                }`}
-            >
-              {/* User Profile Header */}
-              <div className="p-4 border-b border-slate-800/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                    {userProfile.avatar_url ? (
-                      <img 
-                        src={userProfile.avatar_url} 
-                        alt={userProfile.full_name} 
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-base">{getUserInitials(userProfile.full_name)}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-200 truncate">
-                      {userProfile.full_name}
-                    </p>
-                    <p className="text-xs text-slate-400 truncate">
-                      {userProfile.email}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Menu Items */}
-              <div className="p-2 space-y-1">
-                {profileMenuItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handleProfileAction(item.id, item.path)}
-                      className="w-full flex items-start gap-3 p-3 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group text-left"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-4 h-4 text-cyan-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-slate-200 group-hover:text-cyan-300 transition-colors">
-                          {item.label}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-0.5 truncate">
-                          {item.description}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-
-                {/* Theme Toggle */}
-                <button
-                  onClick={() => handleProfileAction("theme-toggle", undefined)}
-                  className="w-full flex items-start gap-3 p-3 hover:bg-slate-800/50 rounded-xl transition-all duration-200 group text-left"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center flex-shrink-0">
-                    {darkMode ? <Moon className="w-4 h-4 text-amber-400" /> : <Sun className="w-4 h-4 text-orange-400" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">
-                      {darkMode ? "Dark Mode" : "Light Mode"}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">Theme preference</p>
-                  </div>
-                </button>
-
-                {/* Logout */}
-                <button
-                  onClick={() => handleProfileAction("logout", undefined)}
-                  className="w-full flex items-start gap-3 p-3 hover:bg-rose-500/10 rounded-xl transition-all duration-200 group text-left border-t border-slate-800/50 mt-1 pt-3"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-rose-500/20 to-red-500/20 flex items-center justify-center flex-shrink-0">
-                    <LogOut className="w-4 h-4 text-rose-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-200 group-hover:text-rose-300 transition-colors">
-                      Logout
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">Sign out</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
+          <ProfileDropdown
+            isOpen={profileOpen}
+            onClose={() => setProfileOpen(false)}
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+            userProfile={userProfile}
+            sidebarCollapsed={sidebarCollapsed}
+            isMobile={isMobile}
+            onNavigate={handleNavigation}
+            onLogout={handleLogout}
+          />
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div 
-        className={`flex-1 flex flex-col transition-all duration-300 overflow-hidden ${
-          isMobile ? 'ml-0' : (sidebarCollapsed ? 'ml-20' : 'ml-72')
+      {/* Main Content Area */}
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out overflow-hidden ${
+          isMobile ? "ml-0" : sidebarCollapsed ? "ml-20" : "ml-72"
         }`}
       >
-        {/* Navbar */}
-        <header className="flex-shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-cyan-400/20 px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
+        {/* Top Navigation Bar */}
+        <header className="flex-shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-cyan-400/20 px-4 sm:px-6 py-4 shadow-lg relative z-30">
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-violet-500/5 pointer-events-none" />
+          
+          <div className="flex items-center justify-between relative">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
               {isMobile && (
                 <button
                   onClick={() => setSidebarOpen(true)}
@@ -390,44 +408,110 @@ const DashboardLayout = ({ onPageChange }) => {
                   <Menu className="w-6 h-6 text-slate-300" />
                 </button>
               )}
-              <div className="min-w-0">
+              
+              <div className="min-w-0 flex-1">
                 <h1 className="text-lg sm:text-xl font-bold text-slate-100 truncate">
-                  {menuItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+                  {menuItems.find((item) => item.path === location.pathname)?.label || "Dashboard"}
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-400 hidden sm:block truncate">
                   Welcome back, {userProfile.full_name}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-              <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors relative">
-                <Bell className="w-5 h-5 text-slate-300" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+              {/* Search Button */}
+              <button
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors group relative"
+                onClick={() => setSearchOpen(true)}
+                title="Search (Ctrl+K)"
+              >
+                <Search className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
               </button>
-              <button 
-                className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+
+              {/* Notifications */}
+              <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors relative group">
+                <Bell className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 transition-colors" />
+                {notificationCount > 0 && (
+                  <>
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                      {notificationCount}
+                    </span>
+                  </>
+                )}
+              </button>
+
+              {/* Settings */}
+              <button
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors group"
                 onClick={() => handleNavigation("/dashboard/settings")}
               >
-                <Settings className="w-5 h-5 text-slate-300" />
+                <Settings className="w-5 h-5 text-slate-300 group-hover:text-cyan-400 group-hover:rotate-90 transition-all duration-300" />
               </button>
             </div>
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
           <div className="max-w-7xl mx-auto">
-            <Outlet />
+            {isLoading ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-400"></div>
+              </div>
+            ) : (
+              <Outlet />
+            )}
           </div>
         </main>
       </div>
 
+      {/* Search Modal */}
+      {searchOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] flex items-start justify-center pt-20 px-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-cyan-400/30 rounded-2xl shadow-2xl w-full max-w-2xl animate-in slide-in-from-top-4 duration-200">
+            <div className="p-4 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <Search className="w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="flex-1 bg-transparent text-slate-200 placeholder-slate-500 outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={() => setSearchOpen(false)}
+                  className="text-xs text-slate-500 px-2 py-1 bg-slate-800 rounded"
+                >
+                  ESC
+                </button>
+              </div>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-slate-400">Start typing to search...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Scrollbar Styles */}
       <style>{`
-        .overflow-y-auto::-webkit-scrollbar { width: 6px; }
-        .overflow-y-auto::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.3); border-radius: 10px; }
-        .overflow-y-auto::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, rgb(34, 211, 238), rgb(59, 130, 246)); border-radius: 10px; }
-        .overflow-y-auto::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, rgb(6, 182, 212), rgb(37, 99, 235)); }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+          height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.3);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(34, 211, 238, 0.3);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(34, 211, 238, 0.5);
+        }
       `}</style>
     </div>
   );

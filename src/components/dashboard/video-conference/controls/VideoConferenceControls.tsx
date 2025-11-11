@@ -53,6 +53,10 @@ interface VideoConferenceControlsProps {
   toggleAiFeature?: (feature: string) => void;
   meetingId?: string;
   participants?: Array<{ id: string; name: string }>;
+  // Add new props for free transcription
+  localStreamRef?: React.RefObject<MediaStream>;
+  currentUserId?: string;
+  currentUserName?: string;
 }
 
 export const VideoConferenceControls: React.FC<VideoConferenceControlsProps> = ({
@@ -101,7 +105,11 @@ export const VideoConferenceControls: React.FC<VideoConferenceControlsProps> = (
   },
   toggleAiFeature = () => {},
   meetingId = "default-meeting-id",
-  participants = []
+  participants = [],
+  // Add new props for free transcription
+  localStreamRef,
+  currentUserId,
+  currentUserName
 }) => {
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [showAutoSummary, setShowAutoSummary] = useState(false);
@@ -171,6 +179,10 @@ export const VideoConferenceControls: React.FC<VideoConferenceControlsProps> = (
             participants={participants}
             showAutoSummary={showAutoSummary}
             setShowAutoSummary={setShowAutoSummary}
+            // Pass new props for free transcription
+            localStreamRef={localStreamRef}
+            currentUserId={currentUserId}
+            currentUserName={currentUserName}
           />
 
           <EndCallButton handleEndCall={handleEndCall} />

@@ -48,6 +48,10 @@ CREATE POLICY "Users can update their meetings"
   ON public.meetings FOR UPDATE
   USING (auth.uid() = host_id);
 
+CREATE POLICY "Users can delete their meetings"
+  ON public.meetings FOR DELETE
+  USING (auth.uid() = host_id);
+
 -- Create meeting participants table
 CREATE TABLE public.meeting_participants (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

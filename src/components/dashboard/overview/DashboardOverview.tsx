@@ -1,45 +1,57 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, CheckCircle, TrendingUp, Users, Video, Sparkles, Brain, Zap, Target, MessageSquare, BarChart2, AlertCircle, Star, FileText, Mic, Play, ArrowUpRight, TrendingDown, Presentation, BookOpen, Activity, Headphones, Menu } from "lucide-react";
+import { Calendar, Clock, CheckCircle, TrendingUp, Users, Video, Sparkles, Brain, Zap, Target, MessageSquare, BarChart2, AlertCircle, Star, FileText, Mic, Play, ArrowUpRight, TrendingDown, Presentation, BookOpen, Activity, Headphones, Hash, Bell, Search, Filter, Download, Share2, Settings, ChevronRight, PieChart, Globe, Shield, Workflow, Database, Code, Rocket } from "lucide-react";
 
 const DashboardOverview = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const stats = [
     {
-      label: "Meetings Today",
-      value: "4",
+      label: "Today's Meetings",
+      value: "8",
       icon: Calendar,
       trend: "+12%",
       isPositive: true,
-      color: "from-cyan-500 to-blue-600",
-      subtext: "2 upcoming"
+      color: "blue",
+      subtext: "3 upcoming",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-600",
+      borderColor: "border-blue-200"
     },
     {
-      label: "Active Tasks",
-      value: "12",
+      label: "Completed Tasks",
+      value: "24",
       icon: CheckCircle,
-      trend: "-8%",
-      isPositive: false,
-      color: "from-emerald-500 to-teal-600",
-      subtext: "3 overdue"
+      trend: "+18%",
+      isPositive: true,
+      color: "emerald",
+      subtext: "6 in progress",
+      bgColor: "bg-emerald-50",
+      textColor: "text-emerald-600",
+      borderColor: "border-emerald-200"
     },
     {
       label: "Hours Saved",
-      value: "8.5",
+      value: "12.5",
       icon: Clock,
       trend: "+45%",
       isPositive: true,
-      color: "from-violet-500 to-purple-600",
-      subtext: "This week"
+      color: "purple",
+      subtext: "This week",
+      bgColor: "bg-purple-50",
+      textColor: "text-purple-600",
+      borderColor: "border-purple-200"
     },
     {
       label: "Team Members",
-      value: "24",
+      value: "32",
       icon: Users,
-      trend: "+3",
+      trend: "+5",
       isPositive: true,
-      color: "from-fuchsia-500 to-pink-600",
-      subtext: "5 active now"
+      color: "orange",
+      subtext: "8 active now",
+      bgColor: "bg-orange-50",
+      textColor: "text-orange-600",
+      borderColor: "border-orange-200"
     }
   ];
 
@@ -52,27 +64,30 @@ const DashboardOverview = () => {
       aiInsight: "High engagement expected",
       hasRecording: true,
       priority: "high",
-      category: "Strategy"
+      category: "Strategy",
+      color: "red"
     },
     {
       id: 2,
       title: "Design System Updates",
       time: "2:00 PM - 2:45 PM",
       participants: 5,
-      aiInsight: "Optimal timing",
+      aiInsight: "Optimal timing detected",
       hasRecording: false,
       priority: "medium",
-      category: "Design"
+      category: "Design",
+      color: "blue"
     },
     {
       id: 3,
-      title: "Sprint Planning",
+      title: "Sprint Planning Session",
       time: "4:00 PM - 5:00 PM",
       participants: 12,
-      aiInsight: "Consider rescheduling",
+      aiInsight: "Peak productivity window",
       hasRecording: true,
       priority: "high",
-      category: "Development"
+      category: "Development",
+      color: "emerald"
     }
   ];
 
@@ -80,121 +95,227 @@ const DashboardOverview = () => {
     {
       icon: Brain,
       title: "Smart Summaries",
-      description: "AI-generated meeting summaries with key points",
-      color: "from-violet-500 to-purple-600",
-      stats: "15 created today",
-      percentage: "98%"
+      description: "AI-generated meeting notes with actionable insights",
+      color: "purple",
+      stats: "28 generated",
+      percentage: "98%",
+      trend: "+15%"
     },
     {
       icon: Mic,
       title: "Live Transcription",
-      description: "Real-time speech-to-text with speaker detection",
-      color: "from-fuchsia-500 to-pink-600",
-      stats: "98% accuracy",
-      percentage: "100%"
+      description: "Real-time speech-to-text with speaker identification",
+      color: "blue",
+      stats: "99% accuracy",
+      percentage: "100%",
+      trend: "+2%"
     },
     {
       icon: Target,
-      title: "Action Items",
-      description: "Automatically extract and assign tasks",
-      color: "from-teal-500 to-cyan-600",
-      stats: "23 extracted",
-      percentage: "85%"
+      title: "Action Extraction",
+      description: "Automatically detect and assign tasks from discussions",
+      color: "emerald",
+      stats: "47 extracted",
+      percentage: "92%",
+      trend: "+8%"
     },
     {
-      icon: Presentation,
-      title: "Meeting Analytics",
-      description: "Track engagement and participation metrics",
-      color: "from-orange-500 to-red-600",
+      icon: BarChart2,
+      title: "Analytics Engine",
+      description: "Comprehensive metrics and participation tracking",
+      color: "orange",
       stats: "Real-time data",
-      percentage: "92%"
+      percentage: "95%",
+      trend: "+12%"
     }
   ];
 
   const insights = [
     {
-      icon: Zap,
-      title: "Meeting Efficiency Up 45%",
-      description: "Your meetings are 12 minutes shorter on average this week",
+      icon: TrendingUp,
+      title: "Productivity Increased 45%",
+      description: "Meetings are 15 minutes shorter on average",
       color: "emerald",
       impact: "positive"
     },
     {
       icon: AlertCircle,
-      title: "3 Tasks Need Attention",
-      description: "High-priority items due within 24 hours",
-      color: "rose",
+      title: "5 Priority Items",
+      description: "High-priority tasks requiring immediate attention",
+      color: "red",
       impact: "warning"
     },
     {
       icon: Star,
-      title: "Optimal Schedule Found",
-      description: "Best meeting time: Tomorrow 10 AM - high availability",
+      title: "Optimal Schedule Detected",
+      description: "Best meeting slot: Tomorrow 9 AM (87% team availability)",
       color: "blue",
       impact: "info"
     },
     {
       icon: Activity,
-      title: "Productivity Peak",
-      description: "Most active between 10 AM - 12 PM",
-      color: "violet",
+      title: "Peak Performance Hours",
+      description: "Team most productive 9 AM - 11 AM daily",
+      color: "purple",
       impact: "positive"
     }
   ];
 
   const recentActivity = [
-    { type: "meeting", text: "Product Strategy Review completed", time: "2 hours ago", icon: Video, color: "cyan" },
-    { type: "task", text: "5 new action items assigned", time: "3 hours ago", icon: CheckCircle, color: "emerald" },
-    { type: "summary", text: "AI summary generated for Design Sync", time: "4 hours ago", icon: FileText, color: "violet" },
-    { type: "alert", text: "Meeting conflict detected - resolved", time: "5 hours ago", icon: AlertCircle, color: "rose" }
+    { type: "meeting", text: "Quarterly Review completed with 12 action items", time: "45 min ago", icon: Video, color: "blue" },
+    { type: "task", text: "Design sprint tasks distributed to 6 team members", time: "1 hour ago", icon: CheckCircle, color: "emerald" },
+    { type: "summary", text: "AI summary generated for Engineering Sync", time: "2 hours ago", icon: FileText, color: "purple" },
+    { type: "alert", text: "Schedule conflict resolved automatically", time: "3 hours ago", icon: AlertCircle, color: "orange" }
   ];
 
-  const quickActions = [
-    { icon: Play, label: "Start Meeting", color: "from-cyan-500 to-blue-600" },
-    { icon: MessageSquare, label: "Ask AI", color: "from-fuchsia-500 to-pink-600" },
-    { icon: BookOpen, label: "Transcripts", color: "from-violet-500 to-purple-600" },
-    { icon: Headphones, label: "Audio Only", color: "from-teal-500 to-cyan-600" }
+  const advancedFeatures = [
+    {
+      icon: Mic,
+      title: "Speaker Diarization",
+      description: "Identify individual speakers throughout conversations",
+      color: "blue",
+      badge: "AI"
+    },
+    {
+      icon: Activity,
+      title: "Sentiment Analysis",
+      description: "Track emotional tone and engagement levels",
+      color: "purple",
+      badge: "AI"
+    },
+    {
+      icon: Hash,
+      title: "Topic Clustering",
+      description: "Automatically categorize discussion themes",
+      color: "emerald",
+      badge: "AI"
+    },
+    {
+      icon: PieChart,
+      title: "Participation Metrics",
+      description: "Measure individual and team contribution",
+      color: "orange",
+      badge: "Analytics"
+    },
+    {
+      icon: Workflow,
+      title: "Workflow Automation",
+      description: "Trigger actions based on meeting outcomes",
+      color: "red",
+      badge: "Pro"
+    },
+    {
+      icon: Globe,
+      title: "Multi-language Support",
+      description: "Transcribe and translate in 50+ languages",
+      color: "blue",
+      badge: "Global"
+    },
+    {
+      icon: Shield,
+      title: "Compliance & Security",
+      description: "Enterprise-grade encryption and audit logs",
+      color: "slate",
+      badge: "Security"
+    },
+    {
+      icon: Database,
+      title: "Data Integration",
+      description: "Connect with CRM, PM tools, and databases",
+      color: "purple",
+      badge: "Integration"
+    }
+  ];
+
+  const newFeatures = [
+    {
+      icon: Code,
+      title: "API Access",
+      description: "Build custom integrations with our REST API",
+      color: "blue",
+      status: "New"
+    },
+    {
+      icon: Rocket,
+      title: "Meeting Rooms",
+      description: "Virtual spaces with persistent history",
+      color: "purple",
+      status: "Beta"
+    },
+    {
+      icon: Brain,
+      title: "AI Coach",
+      description: "Personal assistant for meeting preparation",
+      color: "emerald",
+      status: "New"
+    },
+    {
+      icon: Share2,
+      title: "Team Collaboration",
+      description: "Real-time co-editing and annotations",
+      color: "orange",
+      status: "Coming Soon"
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 sm:w-96 sm:h-96 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-
-
-      <div className="relative z-10 max-w-[1800px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6 lg:space-y-8">
-        {/* Enhanced Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-400 bg-clip-text text-transparent">
-                Dashboard
-              </h1>
-              <div className="px-3 py-1 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-sm">
-                <span className="text-emerald-400 font-bold text-xs sm:text-sm">LIVE</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      {/* <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">MeetingAI</h1>
+                <p className="text-xs text-gray-500">Professional Dashboard</p>
               </div>
             </div>
-            <p className="text-cyan-300/80 text-sm sm:text-lg lg:text-xl font-medium">AI-powered insights at your fingertips</p>
-          </div>
-          
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="hidden sm:flex items-center gap-2 sm:gap-3 bg-slate-900/60 backdrop-blur-xl rounded-xl sm:rounded-2xl px-3 py-2 sm:px-6 sm:py-4 shadow-lg shadow-cyan-500/10">
-              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-cyan-400 animate-pulse" />
-              <span className="text-cyan-300 font-bold text-sm sm:text-lg">AI Active</span>
+            
+            <div className="flex items-center gap-3">
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Search className="w-5 h-5 text-gray-600" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+                <Bell className="w-5 h-5 text-gray-600" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Settings className="w-5 h-5 text-gray-600" />
+              </button>
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                JD
+              </div>
             </div>
-            <button className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 hover:from-violet-500/30 hover:to-fuchsia-500/30 transition-all duration-300 backdrop-blur-xl shadow-lg shadow-violet-500/10">
-              <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-violet-400" />
-            </button>
+          </div>
+        </div>
+      </header> */}
+
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Title */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Overview</h2>
+              <p className="text-gray-600">Welcome back! Here's what's happening today.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium text-gray-700">
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm font-medium">
+                <Play className="w-4 h-4" />
+                Start Meeting
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Stats Grid - Now 2 columns on mobile, 4 on desktop */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             const TrendIcon = stat.isPositive ? ArrowUpRight : TrendingDown;
@@ -202,183 +323,189 @@ const DashboardOverview = () => {
             return (
               <div
                 key={index}
-                className="group relative bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 transition-all duration-500 hover:scale-105 hover:bg-slate-900/60 cursor-pointer overflow-hidden"
+                className={`bg-white border ${stat.borderColor} rounded-xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
+                    <Icon className={`w-6 h-6 ${stat.textColor}`} />
+                  </div>
+                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${
+                    stat.isPositive 
+                      ? 'bg-emerald-50 text-emerald-600' 
+                      : 'bg-red-50 text-red-600'
+                  }`}>
+                    <TrendIcon className="w-3 h-3" />
+                    <span className="text-xs font-semibold">{stat.trend}</span>
+                  </div>
+                </div>
                 
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <div className={`w-10 h-10 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110`}>
-                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
-                    </div>
-                    <div className={`flex items-center gap-1 sm:gap-2 px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl ${
-                      stat.isPositive 
-                        ? 'bg-emerald-500/20 text-emerald-400' 
-                        : 'bg-rose-500/20 text-rose-400'
-                    }`}>
-                      <TrendIcon className="w-3 h-3 sm:w-4 sm:h-4" />
-                      <span className="text-xs sm:text-sm font-bold">{stat.trend}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1 sm:space-y-2">
-                    <div className="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-slate-100 to-slate-300 bg-clip-text text-transparent">
-                      {stat.value}
-                    </div>
-                    <div className="text-slate-400 font-semibold text-sm sm:text-base lg:text-lg">{stat.label}</div>
-                    <div className="text-slate-500 text-xs sm:text-sm font-medium">{stat.subtext}</div>
-                  </div>
+                <div className="space-y-1">
+                  <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
+                  <div className="text-sm font-medium text-gray-600">{stat.label}</div>
+                  <div className="text-xs text-gray-500">{stat.subtext}</div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Main Content - Stacked on mobile, side-by-side on desktop */}
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Left Column - Full width on mobile */}
-          <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+        {/* Main Content Grid */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Column - Takes 2 columns */}
+          <div className="lg:col-span-2 space-y-8">
             {/* Upcoming Meetings */}
-            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 hover:bg-slate-900/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-6 sm:mb-8">
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent mb-1 sm:mb-2">
-                    Today's Meetings
-                  </h2>
-                  <p className="text-cyan-300/70 text-sm sm:text-base lg:text-lg font-medium">AI-optimized schedule</p>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Today's Schedule</h3>
+                  <p className="text-sm text-gray-600">AI-optimized meeting lineup</p>
                 </div>
-                <Calendar className="w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 text-cyan-400" />
+                <button className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1">
+                  View All
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
 
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4">
                 {upcomingMeetings.map((meeting) => (
                   <div
                     key={meeting.id}
-                    className="group relative bg-slate-800/40 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:bg-slate-800/60 transition-all duration-300 cursor-pointer overflow-hidden"
+                    className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h4 className="font-semibold text-gray-900">{meeting.title}</h4>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            meeting.priority === 'high' 
+                              ? 'bg-red-50 text-red-600' 
+                              : 'bg-blue-50 text-blue-600'
+                          }`}>
+                            {meeting.priority.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {meeting.time}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {meeting.participants} people
+                          </span>
+                        </div>
+                      </div>
+                      {meeting.hasRecording && (
+                        <div className="bg-blue-50 rounded-lg p-2">
+                          <Video className="w-5 h-5 text-blue-600" />
+                        </div>
+                      )}
+                    </div>
                     
-                    <div className="relative z-10">
-                      <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2 sm:mb-3 flex-wrap">
-                            <h3 className="text-slate-100 font-bold text-base sm:text-lg lg:text-xl group-hover:text-cyan-300 transition-colors truncate">
-                              {meeting.title}
-                            </h3>
-                            <span className={`px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-bold whitespace-nowrap ${
-                              meeting.priority === 'high' 
-                                ? 'bg-rose-500/20 text-rose-400' 
-                                : 'bg-blue-500/20 text-blue-400'
-                            }`}>
-                              {meeting.priority.toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 text-slate-400 font-medium text-sm">
-                            <span className="flex items-center gap-2">
-                              <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                              <span className="truncate">{meeting.time}</span>
-                            </span>
-                            <span className="flex items-center gap-2">
-                              <Users className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                              {meeting.participants} people
-                            </span>
-                          </div>
-                        </div>
-                        {meeting.hasRecording && (
-                          <div className="bg-cyan-500/20 rounded-lg sm:rounded-xl p-2 sm:p-3 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                            <Video className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-cyan-400" />
-                          </div>
-                        )}
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center gap-2 bg-purple-50 rounded-lg px-3 py-1.5">
+                        <Sparkles className="w-4 h-4 text-purple-600" />
+                        <span className="text-xs font-medium text-purple-700">{meeting.aiInsight}</span>
                       </div>
-                      
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mt-4 pt-4 border-t border-slate-700/50">
-                        <div className="flex items-center gap-2 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 rounded-lg sm:rounded-xl px-3 py-2 flex-1 sm:flex-initial">
-                          <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-violet-400 flex-shrink-0" />
-                          <span className="text-xs sm:text-sm text-violet-300 font-bold truncate">{meeting.aiInsight}</span>
-                        </div>
-                        <button className="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-105 shadow-lg shadow-cyan-500/20 text-sm sm:text-base">
-                          Join
-                        </button>
-                      </div>
+                      <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                        Join
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
-
-              <button className="w-full mt-4 sm:mt-6 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-sm sm:text-base lg:text-lg py-3 sm:py-4 rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-cyan-500/20">
-                Schedule New Meeting
-              </button>
             </div>
 
-            {/* AI Features Grid - 2 columns on all screens */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {/* AI Features Grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
               {aiFeatures.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
                   <div
                     key={index}
-                    className="group relative bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:bg-slate-900/60 transition-all duration-300 cursor-pointer overflow-hidden"
+                    className="bg-white border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer"
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                    
-                    <div className="relative z-10">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-3 sm:mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+                    <div className={`w-12 h-12 bg-${feature.color}-50 rounded-lg flex items-center justify-center mb-4`}>
+                      <Icon className={`w-6 h-6 text-${feature.color}-600`} />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">{feature.title}</h4>
+                    <p className="text-sm text-gray-600 mb-4">{feature.description}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <BarChart2 className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs text-gray-600 font-medium">{feature.stats}</span>
                       </div>
-                      <h3 className="text-slate-100 font-bold text-lg sm:text-xl mb-2 group-hover:text-cyan-300 transition-colors">
-                        {feature.title}
-                      </h3>
-                      <p className="text-slate-400 mb-3 sm:mb-4 font-medium text-sm sm:text-base">{feature.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <BarChart2 className="w-4 h-4 text-cyan-400" />
-                          <span className="text-xs sm:text-sm text-cyan-300 font-bold">{feature.stats}</span>
-                        </div>
-                        <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                          {feature.percentage}
-                        </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-gray-900">{feature.percentage}</span>
+                        <span className="text-xs text-emerald-600 font-medium">{feature.trend}</span>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
 
-          {/* Right Column - Full width on mobile */}
-          <div className="space-y-6 lg:space-y-8">
-            {/* AI Insights */}
-            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:bg-slate-900/60 transition-all duration-300">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
+            {/* Advanced Features */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent mb-1 sm:mb-2">
-                    AI Insights
-                  </h2>
-                  <div className="flex items-center gap-2 text-violet-300 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
-                    <span className="text-xs sm:text-sm">Real-time</span>
-                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">Advanced Features</h3>
+                  <p className="text-sm text-gray-600">Enterprise-grade capabilities</p>
                 </div>
-                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-violet-400" />
               </div>
 
-              <div className="space-y-2 sm:space-y-3">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {advancedFeatures.map((feature, index) => {
+                  const Icon = feature.icon;
+                  return (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div className={`w-10 h-10 bg-${feature.color}-50 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <Icon className={`w-5 h-5 text-${feature.color}-600`} />
+                        </div>
+                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                          {feature.badge}
+                        </span>
+                      </div>
+                      <h5 className="font-semibold text-gray-900 text-sm mb-1">{feature.title}</h5>
+                      <p className="text-xs text-gray-600">{feature.description}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* AI Insights */}
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">AI Insights</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-xs text-gray-600">Live</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
                 {insights.map((insight, index) => {
                   const Icon = insight.icon;
                   return (
                     <div
                       key={index}
-                      className="group p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-slate-800/40 hover:bg-slate-800/60 transition-all duration-300 cursor-pointer"
+                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-all duration-200 cursor-pointer"
                     >
-                      <div className="flex items-start gap-2 sm:gap-3">
-                        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 text-${insight.color}-400 flex-shrink-0 mt-0.5 sm:mt-1 group-hover:scale-110 transition-transform duration-300`} />
-                        <div className="min-w-0">
-                          <p className={`text-slate-100 font-bold mb-1 text-sm sm:text-base group-hover:text-${insight.color}-300 transition-colors`}>
-                            {insight.title}
-                          </p>
-                          <p className="text-slate-400 text-xs sm:text-sm font-medium">
-                            {insight.description}
-                          </p>
+                      <div className="flex items-start gap-3">
+                        <Icon className={`w-5 h-5 text-${insight.color}-600 mt-0.5 flex-shrink-0`} />
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm mb-1">{insight.title}</p>
+                          <p className="text-xs text-gray-600">{insight.description}</p>
                         </div>
                       </div>
                     </div>
@@ -388,26 +515,22 @@ const DashboardOverview = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:bg-slate-900/60 transition-all duration-300">
-              <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-4 sm:mb-6">
-                Recent Activity
-              </h2>
-              <div className="space-y-2 sm:space-y-3">
+            <div className="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h3>
+              <div className="space-y-3">
                 {recentActivity.map((activity, index) => {
                   const Icon = activity.icon;
                   return (
                     <div
                       key={index}
-                      className="flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl bg-slate-800/40 hover:bg-slate-800/60 transition-all duration-300 cursor-pointer group"
+                      className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                     >
-                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-${activity.color}-500/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className={`w-4 h-4 sm:w-5 sm:h-5 text-${activity.color}-400`} />
+                      <div className={`w-9 h-9 bg-${activity.color}-50 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`w-4 h-4 text-${activity.color}-600`} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-slate-100 font-bold text-xs sm:text-sm group-hover:text-${activity.color}-300 transition-colors`}>
-                          {activity.text}
-                        </p>
-                        <p className="text-slate-500 text-xs mt-1 font-medium">{activity.time}</p>
+                        <p className="text-sm font-medium text-gray-900">{activity.text}</p>
+                        <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                       </div>
                     </div>
                   );
@@ -415,28 +538,40 @@ const DashboardOverview = () => {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-slate-900/40 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:bg-slate-900/60 transition-all duration-300">
-              <h2 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent mb-4 sm:mb-6">
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-2 gap-3">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
+            {/* New Features */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Sparkles className="w-5 h-5 text-blue-600" />
+                <h3 className="text-xl font-bold text-gray-900">What's New</h3>
+              </div>
+
+              <div className="space-y-3">
+                {newFeatures.map((feature, index) => {
+                  const Icon = feature.icon;
                   return (
-                    <button
+                    <div
                       key={index}
-                      className="group relative flex flex-col items-center gap-2 sm:gap-3 bg-slate-800/40 hover:bg-slate-800/60 backdrop-blur-sm p-4 sm:p-5 rounded-xl sm:rounded-2xl transition-all duration-300 hover:scale-105 overflow-hidden"
+                      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
                     >
-                      <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                      
-                      <div className={`relative z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${action.color} bg-opacity-20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-100" />
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 bg-${feature.color}-50 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-5 h-5 text-${feature.color}-600`} />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h5 className="font-semibold text-gray-900 text-sm">{feature.title}</h5>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                              feature.status === 'New' ? 'bg-emerald-100 text-emerald-700' :
+                              feature.status === 'Beta' ? 'bg-blue-100 text-blue-700' :
+                              'bg-orange-100 text-orange-700'
+                            }`}>
+                              {feature.status}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600">{feature.description}</p>
+                        </div>
                       </div>
-                      <span className="relative z-10 text-slate-200 font-bold text-xs sm:text-sm text-center leading-tight">
-                        {action.label}
-                      </span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -444,19 +579,6 @@ const DashboardOverview = () => {
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 };

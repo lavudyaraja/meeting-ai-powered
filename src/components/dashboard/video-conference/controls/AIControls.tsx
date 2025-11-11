@@ -14,6 +14,7 @@ import {
   X
 } from "lucide-react";
 import { AutoSummary } from "../ai-features";
+import { FreeTranscription } from "../ai-features/FreeTranscription";
 
 interface AIControlsProps {
   aiFeatures: {
@@ -33,6 +34,10 @@ interface AIControlsProps {
   participants?: Array<{ id: string; name: string }>;
   showAutoSummary: boolean;
   setShowAutoSummary: (show: boolean) => void;
+  // Add new props for free transcription
+  localStreamRef?: React.RefObject<MediaStream>;
+  currentUserId?: string;
+  currentUserName?: string;
 }
 
 export const AIControls: React.FC<AIControlsProps> = ({
@@ -52,14 +57,24 @@ export const AIControls: React.FC<AIControlsProps> = ({
   meetingId = "default-meeting-id",
   participants = [],
   showAutoSummary,
-  setShowAutoSummary
+  setShowAutoSummary,
+  localStreamRef,
+  currentUserId,
+  currentUserName
 }) => {
   const aiMenuRef = useRef<HTMLDivElement>(null);
   const [showAiMenu, setShowAiMenu] = React.useState(false);
+  const [showFreeTranscription, setShowFreeTranscription] = React.useState(false); // Add state for free transcription
 
   const handleAutoSummaryClick = () => {
     // Only open the AutoSummary panel when user clicks on it
     setShowAutoSummary(true);
+    setShowAiMenu(false);
+  };
+
+  // Handle free transcription click
+  const handleFreeTranscriptionClick = () => {
+    setShowFreeTranscription(true);
     setShowAiMenu(false);
   };
 
@@ -80,7 +95,8 @@ export const AIControls: React.FC<AIControlsProps> = ({
       icon: FileText,
       label: 'Live Transcription',
       description: 'Real-time speech-to-text captions',
-      active: aiFeatures.liveTranscription
+      active: aiFeatures.liveTranscription,
+      onClick: handleFreeTranscriptionClick // Use free transcription for live transcription
     },
     {
       key: 'autoSummary',
@@ -223,6 +239,38 @@ export const AIControls: React.FC<AIControlsProps> = ({
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Free Transcription Panel */}
+      {showFreeTranscription && localStreamRef && currentUserId && currentUserName && (
+        <div 
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowFreeTranscription(false)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl animate-in w-full max-w-2xl max-h-[90vh] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-100">Free Live Transcription</h3>
+              <button 
+                onClick={() => setShowFreeTranscription(false)} 
+                className="text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 max-h-[70vh] overflow-y-auto">
+              <FreeTranscription 
+                localStreamRef={localStreamRef}
+                meetingId={meetingId}
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+                className="border-0 bg-transparent p-0"
+              />
+            </div>
           </div>
         </div>
       )}

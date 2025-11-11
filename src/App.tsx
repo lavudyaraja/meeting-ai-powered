@@ -10,19 +10,24 @@ import Settings from "./pages/Settings";
 import AIMeetingAssistant from "./pages/AIMeetingAssistant";
 import Meetings from "./pages/Meetings";
 import ParticipantJoinPage from "./pages/ParticipantJoinPage";
+import TaskDetail from "./pages/TaskDetail";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
 // Dashboard components
 import DashboardOverview from "./components/dashboard/overview/DashboardOverview";
-import MeetingsList from "./components/dashboard/MeetingsList";
-import TasksManager from "./components/dashboard/taskmode/TasksManager";
+import MeetingsList from "./components/meetings/MeetingsList";
+import { TasksManager } from "./components/dashboard/taskmode";
 // import  VideoConference  from "./components/dashboard/video-conference";
 import SimpleVideoConference from "./components/dashboard/video-conference/SimpleVideoConference";
 import RecordingsLibrary from "./components/dashboard/recordings/RecordingsLibrary";
 import AIAssistant from "./components/dashboard/AIAssistant";
+import ProfilePage from "./components/dashboard/profile/ProfilePage";
+import AdvancedMeetingsPage from "./pages/AdvancedMeetings";
+import AIFeatures from "./pages/AIFeatures";
 // Meetings components
 import { MeetingViewer } from "./components/meetings";
-import MeetingDialog from "./components/dashboard/MeetingDialog";
+import MeetingDialog from "./components/meetings/MeetingDialog";
 
 const queryClient = new QueryClient();
 
@@ -47,9 +52,22 @@ const App = () => (
             <Route path="overview" element={<DashboardOverview />} />
             <Route path="meetings" element={<MeetingsList />} />
             <Route path="tasks" element={<TasksManager />} />
+            <Route path="tasks/:id" element={<TaskDetail />} />
             <Route path="ai-assistant" element={<AIAssistant />} />
+            <Route path="ai-features" element={<AIFeatures />} />
             <Route path="video-conference" element={<SimpleVideoConference />} />
             <Route path="recordings" element={<RecordingsLibrary />} />
+            <Route path="advanced-meetings" element={<AdvancedMeetingsPage />} />
+          </Route>
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<ProfilePage />} />
           </Route>
           {/* Meetings Routes */}
           <Route

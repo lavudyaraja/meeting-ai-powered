@@ -35,6 +35,7 @@ export const VideoConferenceMain = ({
   reactions,
   localStreamRef,
   videoContainerRef,
+  showToast,
   participants,
   pinnedParticipant,
   audioLevel
@@ -54,8 +55,14 @@ export const VideoConferenceMain = ({
           if (audioTracks.length > 0) {
             audioTracks[0].enabled = true;
           }
+          // Ensure video is also enabled for local stream
+          const videoTracks = localStreamRef.current.getVideoTracks();
+          if (videoTracks.length > 0) {
+            videoTracks[0].enabled = true;
+          }
           await videoRef.current.play();
           setVideoError(false);
+          console.log('Local video playback started successfully');
         } catch (error) {
           console.error('Error playing video:', error);
           setVideoError(true);
@@ -65,6 +72,54 @@ export const VideoConferenceMain = ({
     
     setupVideo();
   }, [connectionStatus, localStreamRef, videoRef]);
+
+  // Setup local audio monitoring
+  useEffect(() => {
+    let localAudioElement: HTMLAudioElement | null = null;
+    
+    const setupLocalAudioMonitoring = async () => {
+      if (localStreamRef.current && connectionStatus === 'connected') {
+        // Create a separate audio element for local audio monitoring
+        // This allows users to hear their own audio
+        localAudioElement = document.createElement('audio');
+        localAudioElement.srcObject = localStreamRef.current;
+        localAudioElement.muted = false; // Enable local audio monitoring
+        localAudioElement.volume = 0.1; // Low volume to avoid feedback
+        localAudioElement.autoplay = true;
+        document.body.appendChild(localAudioElement);
+        
+        // Try to play the local audio
+        try {
+          await localAudioElement.play();
+          console.log('Local audio monitoring started');
+        } catch (error) {
+          console.log('Local audio monitoring requires user interaction');
+          // Set up user interaction handler
+          const enableAudioOnInteraction = async () => {
+            try {
+              await localAudioElement!.play();
+              console.log('Local audio monitoring enabled after user interaction');
+            } catch (e) {
+              console.error('Failed to enable local audio monitoring:', e);
+            }
+            document.removeEventListener('click', enableAudioOnInteraction);
+          };
+          document.addEventListener('click', enableAudioOnInteraction, { once: true });
+        }
+      }
+    };
+    
+    setupLocalAudioMonitoring();
+    
+    // Cleanup function
+    return () => {
+      if (localAudioElement) {
+        localAudioElement.pause();
+        localAudioElement.srcObject = null;
+        localAudioElement.remove();
+      }
+    };
+  }, [connectionStatus, localStreamRef]);
 
   // Setup video and audio elements for participants
   useEffect(() => {
@@ -185,7 +240,7 @@ export const VideoConferenceMain = ({
       }
     });
     
-    // Cleanup function
+    // Cleanup function - only clean up audio elements, not video elements as they're managed separately
     return () => {
       Object.values(audioElementsRef.current).forEach(audioElement => {
         if (audioElement) {
@@ -232,6 +287,18 @@ export const VideoConferenceMain = ({
                   if (!isLocalParticipant) {
                     video.muted = true; // Mute video element, audio handled separately
                     video.play().catch(e => console.log('Auto-play video:', e));
+                  } else {
+                    // For local participant, ensure video plays
+                    video.muted = true; // Mute to avoid feedback
+                    const playVideo = async () => {
+                      try {
+                        await video.play();
+                        console.log('Local video playback started');
+                      } catch (error) {
+                        console.log('Local video playback requires user interaction:', error);
+                      }
+                    };
+                    playVideo();
                   }
                 }
               }

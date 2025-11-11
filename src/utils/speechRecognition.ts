@@ -34,6 +34,9 @@ export class SpeechRecognitionService {
   private currentSpeakerName: string = 'Unknown Speaker';
   private silenceTimeout: any = null;
   private lastTranscriptTime: number = 0;
+  private audioContext: AudioContext | null = null;
+  private analyser: AnalyserNode | null = null;
+  private microphone: MediaStreamAudioSourceNode | null = null;
 
   constructor(config: SpeechRecognitionConfig) {
     this.config = {
@@ -64,6 +67,11 @@ export class SpeechRecognitionService {
     this.recognition.interimResults = this.config.interimResults;
     this.recognition.maxAlternatives = this.config.maxAlternatives;
     this.recognition.lang = this.config.language;
+    
+    // Enhanced configuration for better accuracy
+    this.recognition.interimResults = true;
+    this.recognition.maxAlternatives = 3; // Get multiple alternatives for better accuracy
+    this.recognition.continuous = true;
 
     // Handle recognition results
     this.recognition.onresult = (event: any) => {
@@ -132,22 +140,32 @@ export class SpeechRecognitionService {
     };
   }
 
+  // Enhanced result handling with confidence scoring
   private handleResult(event: any) {
     const results = event.results;
     const resultIndex = event.resultIndex;
     
     for (let i = resultIndex; i < results.length; i++) {
       const result = results[i];
-      const transcript = result[0].transcript;
-      const confidence = result[0].confidence || 0;
+      let bestTranscript = '';
+      let bestConfidence = 0;
+      
+      // Check all alternatives and pick the one with highest confidence
+      for (let j = 0; j < result.length; j++) {
+        if (result[j].confidence > bestConfidence) {
+          bestConfidence = result[j].confidence;
+          bestTranscript = result[j].transcript;
+        }
+      }
+      
       const isFinal = result.isFinal;
 
       const segment: TranscriptSegment = {
         id: `transcript-${Date.now()}-${i}`,
-        text: transcript.trim(),
+        text: bestTranscript.trim(),
         timestamp: new Date().toISOString(),
         isFinal,
-        confidence,
+        confidence: bestConfidence,
         speakerId: this.currentSpeakerId,
         speakerName: this.currentSpeakerName,
         language: this.config.language
@@ -333,24 +351,7 @@ export class SpeechRecognitionService {
     // Common languages supported by Web Speech API
     return [
       'en-US', 'en-GB', 'en-AU', 'en-CA', 'en-IN', 'en-NZ',
-      'es-ES', 'es-MX', 'es-AR',
-      'fr-FR', 'fr-CA',
-      'de-DE',
-      'it-IT',
-      'pt-BR', 'pt-PT',
-      'ru-RU',
-      'zh-CN', 'zh-TW', 'zh-HK',
-      'ja-JP',
-      'ko-KR',
-      'hi-IN',
-      'ar-SA',
-      'nl-NL',
-      'tr-TR',
-      'pl-PL',
-      'sv-SE',
-      'da-DK',
-      'no-NO',
-      'fi-FI'
+      'es-ES', 'es-MX', 'es-AR'
     ];
   }
 
@@ -372,31 +373,7 @@ export class SpeechRecognitionService {
 export function getLanguageName(code: string): string {
   const languageNames: { [key: string]: string } = {
     'en-US': 'English (US)',
-    'en-GB': 'English (UK)',
-    'en-AU': 'English (Australia)',
-    'en-CA': 'English (Canada)',
-    'en-IN': 'English (India)',
-    'es-ES': 'Spanish (Spain)',
-    'es-MX': 'Spanish (Mexico)',
-    'fr-FR': 'French (France)',
-    'de-DE': 'German',
-    'it-IT': 'Italian',
-    'pt-BR': 'Portuguese (Brazil)',
-    'pt-PT': 'Portuguese (Portugal)',
-    'ru-RU': 'Russian',
-    'zh-CN': 'Chinese (Simplified)',
-    'zh-TW': 'Chinese (Traditional)',
-    'ja-JP': 'Japanese',
-    'ko-KR': 'Korean',
-    'hi-IN': 'Hindi',
-    'ar-SA': 'Arabic',
-    'nl-NL': 'Dutch',
-    'tr-TR': 'Turkish',
-    'pl-PL': 'Polish',
-    'sv-SE': 'Swedish',
-    'da-DK': 'Danish',
-    'no-NO': 'Norwegian',
-    'fi-FI': 'Finnish'
+    'en-GB': 'English (UK)'
   };
 
   return languageNames[code] || code;

@@ -1,5 +1,5 @@
 import React from 'react';
-import MeetingsList from '@/components/dashboard/MeetingsList';
+import MeetingsList from '@/components/meetings/MeetingsList';
 
 const Meetings: React.FC = () => {
   return (
